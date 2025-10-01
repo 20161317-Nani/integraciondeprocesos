@@ -25,26 +25,26 @@ export const routes = [
       },
       {
         icon: <UserCircleIcon {...icon} />,
-        name: "profile",
+        name: "Perfil",
         path: "/profile",
         element: <Profile />,
       },
-      {
+      /*{
         icon: <TableCellsIcon {...icon} />,
         name: "tables",
         path: "/tables",
         element: <Tables />,
-      },
+      },*/
       {
         icon: <InformationCircleIcon {...icon} />,
-        name: "notifications",
+        name: "Historial",
         path: "/notifications",
         element: <Notifications />,
       },
     ],
   },
   {
-    title: "auth pages",
+    title: "Registro",
     layout: "auth",
     pages: [
       {
