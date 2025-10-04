@@ -29,12 +29,12 @@ export const routes = [
         path: "/profile",
         element: <Profile />,
       },
-      /*{
+      {
         icon: <TableCellsIcon {...icon} />,
-        name: "tables",
+        name: "Guardados",
         path: "/tables",
         element: <Tables />,
-      },*/
+      },
       {
         icon: <InformationCircleIcon {...icon} />,
         name: "Historial",
