@@ -6,7 +6,7 @@ import {
 } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
 
-export function SignIn() {
+export function SignUp() {
   return (
     <section className="flex items-center justify-center min-h-screen bg-blue-100">
       <Card shadow={true} className="flex flex-col lg:flex-row w-full max-w-5xl p-6 bg-white rounded-2xl">
@@ -14,7 +14,7 @@ export function SignIn() {
         {/* Imagen lado izquierdo */}
         <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
           <img
-            src="/img/pattern.png"
+            src="https://via.placeholder.com/400x400"
             alt="Login"
             className="rounded-2xl object-cover w-full h-full"
           />
@@ -84,4 +84,4 @@ export function SignIn() {
   );
 }
 
-export default SignIn;
+export default SignUp;
