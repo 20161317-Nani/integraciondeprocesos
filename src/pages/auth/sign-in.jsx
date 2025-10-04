@@ -1,110 +1,80 @@
-import {
-  Card,
-  Input,
-  Button,
-  Typography,
-} from "@material-tailwind/react";
+import { Input, Button, Typography } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
 
-export function SignIn() {
+export default function SignUp() {
   return (
     <section className="min-h-screen flex items-center justify-center bg-blue-200">
-      <Card className="w-full max-w-5xl flex flex-col lg:flex-row shadow-xl rounded-2xl">
-        
-        {/* Imagen a la izquierda */}
-        <div className="hidden lg:flex w-2/5 items-center justify-center bg-white rounded-l-2xl">
-          <img
-            src="/img/pattern.png"
-            alt="Sign in illustration"
-            className="w-full h-full object-cover rounded-l-2xl"
+      <div className="bg-white p-10 rounded-lg shadow-md w-full max-w-md">
+        {/* Título */}
+        <Typography variant="h3" className="text-center mb-8 font-bold">
+          Registro
+        </Typography>
+
+        {/* Formulario */}
+        <form className="space-y-5">
+          <Input
+            label="Nombre"
+            className="!border-gray-400 focus:!border-blue-500"
+            labelProps={{ className: "before:content-none after:content-none" }}
+            error
           />
-        </div>
+          <Input
+            label="Apellidos"
+            className="!border-gray-400 focus:!border-blue-500"
+            labelProps={{ className: "before:content-none after:content-none" }}
+            error
+          />
+          <Input
+            label="Correo Electronico"
+            type="email"
+            className="!border-gray-400 focus:!border-blue-500"
+            labelProps={{ className: "before:content-none after:content-none" }}
+            error
+          />
+          <Input
+            label="Contraseña"
+            type="password"
+            className="!border-gray-400 focus:!border-blue-500"
+            labelProps={{ className: "before:content-none after:content-none" }}
+            error
+          />
 
-        {/* Formulario a la derecha */}
-        <div className="flex-1 bg-white p-10 rounded-r-2xl">
-          <Typography variant="h3" className="text-center mb-6 font-bold">
-            Inicia Sesión
-          </Typography>
-
-          <form className="space-y-5">
-            {/* Nombre y Apellido en una fila */}
-            <div className="flex gap-4">
-              <Input
-                size="md"
-                label="Nombre"
-                placeholder="Juan"
-                className="!border-gray-300 focus:!border-blue-500"
-                labelProps={{ className: "before:content-none after:content-none" }}
-              />
-              <Input
-                size="md"
-                label="Apellido"
-                placeholder="Pérez"
-                className="!border-gray-300 focus:!border-blue-500"
-                labelProps={{ className: "before:content-none after:content-none" }}
-              />
-            </div>
-
-            {/* Correo */}
-            <Input
-              size="md"
-              label="Correo Electrónico"
-              type="email"
-              placeholder="ejemplo@mail.com"
-              className="!border-gray-300 focus:!border-blue-500"
-              labelProps={{ className: "before:content-none after:content-none" }}
-            />
-
-            {/* Contraseña */}
-            <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-              Contraseña
-            </Typography>
-            <Input
-              size="md"
-              type="password"
-              placeholder="********"
-              className="!border-gray-300 focus:!border-blue-500"
-              labelProps={{
-                className: "before:content-none after:content-none",
-              }}
-            />
-
-            <Button type="submit" fullWidth className="bg-blue-500 hover:bg-blue-600">
-              Ingresar
-            </Button>
-          </form>
-
-          {/* Separador */}
-          <div className="flex items-center my-5">
-            <hr className="flex-1 border-gray-300" />
-            <span className="px-2 text-gray-500">o</span>
-            <hr className="flex-1 border-gray-300" />
-          </div>
-
-          {/* Botón Google */}
           <Button
-            size="md"
-            color="white"
-            className="flex items-center gap-2 justify-center border border-gray-300 shadow-sm"
+            type="submit"
             fullWidth
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold"
           >
-            <img src="/img/google-logo.svg" alt="Google" className="w-5 h-5" />
-            <span>Inicia sesión con Google</span>
+            Registrarse
           </Button>
+        </form>
 
-          <Typography
-            variant="small"
-            className="text-center text-gray-600 mt-5"
-          >
-            ¿No tienes cuenta?
-            <Link to="/auth/sign-up" className="ml-1 text-blue-600 font-medium">
-              Regístrate aquí
-            </Link>
-          </Typography>
+        {/* Link de ingresar */}
+        <Typography variant="small" className="text-center text-gray-600 mt-4">
+          Ya tienes una cuenta?
+          <Link to="/auth/sign-in" className="ml-1 text-blue-600 font-medium">
+            Ingresa aquí
+          </Link>
+        </Typography>
+
+        {/* Línea separadora */}
+        <div className="flex items-center my-6">
+          <hr className="flex-1 border-gray-300" />
+          <span className="px-2 text-gray-500">______</span>
+          <hr className="flex-1 border-gray-300" />
         </div>
-      </Card>
+
+        {/* Botón Google */}
+        <Button
+          variant="outlined"
+          size="md"
+          fullWidth
+          className="flex items-center justify-center gap-2 border-gray-400"
+        >
+          <img src="/img/google-logo.svg" alt="Google" className="w-5 h-5" />
+          Regístrate con Google
+        </Button>
+      </div>
     </section>
   );
 }
 
-export default SignIn;
