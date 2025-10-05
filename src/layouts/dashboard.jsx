@@ -62,10 +62,6 @@ export function Dashboard() {
           )}
         </Routes>
 
-        {/* Footer */}
-        <div className="text-blue-gray-600 dark:text-gray-400 mt-8">
-          <Footer />
-        </div>
       </div>
     </div>
   );
