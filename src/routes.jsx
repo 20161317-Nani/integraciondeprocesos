@@ -45,7 +45,7 @@ export const routes = [
         icon: <HomeIcon {...icon} />,
         name: "Configuracion",
         path: "/configuracion",
-        element: <Configuacion />,
+        element: <Configuracion />,
       },
       {
         icon: <UserCircleIcon {...icon} />,
