@@ -6,7 +6,7 @@ import {
   ServerStackIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
+import { Home, Profile, Tables, Notifications, Ubicacion } from "@/pages/dashboard";
 import { SignIn, SignUp  } from "@/pages/auth";
 import { RecoverPassword } from "@/pages/auth/contraseña";
 const icon = {
@@ -24,22 +24,34 @@ export const routes = [
         element: <Home />,
       },
       {
+        icon: <HomeIcon {...icon} />,
+        name: "Ubicacion",
+        path: "/Ubicacion",
+        element: <Ubicacion />,
+      },
+      {
+        icon: <HomeIcon {...icon} />,
+        name: "Historial",
+        path: "/historial",
+        element: <historial />,
+      },
+      {
+        icon: <HomeIcon {...icon} />,
+        name: "guardados",
+        path: "/Guardados",
+        element: <Guardados />,
+      },
+      {
+        icon: <HomeIcon {...icon} />,
+        name: "configuracion",
+        path: "/configuracion",
+        element: <configuacion />,
+      },
+      {
         icon: <UserCircleIcon {...icon} />,
         name: "Perfil",
         path: "/profile",
         element: <Profile />,
-      },
-      {
-        icon: <TableCellsIcon {...icon} />,
-        name: "Guardados",
-        path: "/tables",
-        element: <Tables />,
-      },
-      {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "Historial",
-        path: "/notifications",
-        element: <Notifications />,
       },
     ],
   },
