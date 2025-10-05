@@ -1,76 +1,69 @@
-import React from "react";
-import {
-  Typography,
-  Card,
-  CardHeader,
-  CardBody,
-  IconButton,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Avatar,
-  Tooltip,
-  Progress,
-} from "@material-tailwind/react";
-import {
-  EllipsisVerticalIcon,
-  ArrowUpIcon,
-} from "@heroicons/react/24/outline";
-import { StatisticsCard } from "@/widgets/cards";
-import { StatisticsChart } from "@/widgets/charts";
-import {
-  statisticsCardsData,
-  statisticsChartsData,
-  projectsTableData,
-  ordersOverviewData,
-} from "@/data";
-import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
+/*import React from "react";
+import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
+import { Typography, Card, CardBody } from "@material-tailwind/react";
+import { MapPinIcon } from "@heroicons/react/24/solid";
 
-export function Ubicacion() {
+export function ubicacion() {
+  // Configurar el centro del mapa (por ejemplo Ciudad de México)
+  const center = { lat: 19.4326, lng: -99.1332 };
+
+  // Tamaño del mapa
+  const containerStyle = {
+    width: "100%",
+    height: "600px",
+    borderRadius: "0.75rem",
+  };
+
+  // Cargar la API de Google Maps
+  const { isLoaded } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: "TU_API_KEY_AQUI", // Reemplaza con tu clave de Google Maps
+  });
+
   return (
-    <div className="mt-12 flex flex-col md:flex-row gap-4">
-      {/* Contenedor principal de video + sugeridos */}
-      <div className="flex-1 flex flex-col gap-4">
-        {/* Video principal */}
-        <div className="bg-black w-full aspect-video rounded-lg shadow-lg flex items-center justify-center text-white text-xl">
-          Video Principal
-        </div>
+    <div className="mt-12 flex flex-col md:flex-row gap-6">
+      {/* Mapa grande *//*}/*
+      <div className="flex-1 bg-white rounded-xl shadow-lg p-4">
+        <Typography variant="h6" color="blue-gray" className="mb-4 font-bold flex items-center gap-2">
+          <MapPinIcon className="h-6 w-6 text-blue-500" />
+          Mapa de Ubicación
+        </Typography>
 
-        {/* Videos sugeridos */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((video) => (
-            <div
-              key={video}
-              className="bg-gray-300 w-full aspect-video rounded-lg shadow flex items-center justify-center text-gray-700"
-            >
-              Video Sugerido {video}
-            </div>
-          ))}
-        </div>
+        {isLoaded ? (
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={center}
+            zoom={12}
+          >
+            <Marker position={center} />
+          </GoogleMap>
+        ) : (
+          <div className="flex items-center justify-center h-[600px] text-gray-500">
+            Cargando mapa...
+          </div>
+        )}
       </div>
 
-      {/* Contenedor de comentarios */}
-      <Card className="w-full md:w-1/3 shadow-lg rounded-lg h-[600px] overflow-y-auto border border-blue-gray-100">
-        <CardBody className="p-4">
-          <Typography variant="h6" className="mb-4 font-bold">
-            Comentarios
-          </Typography>
-          {[1, 2, 3, 4, 5].map((comment) => (
-            <div key={comment} className="mb-3 border-b pb-2">
-              <Typography variant="small" className="font-semibold">
-                Usuario {comment}
-              </Typography>
-              <Typography variant="paragraph" className="text-blue-gray-700 text-sm">
-                Este es un comentario de ejemplo sobre el video.
-              </Typography>
+      {/* Recuadros pequeños tipo video *//*}
+      <div className="w-full md:w-1/3 flex flex-col gap-4">
+        {[1, 2, 3, 4].map((video) => (
+          <Card key={video} className="shadow-lg rounded-lg overflow-hidden">
+            <div className="bg-gray-300 h-40 flex items-center justify-center text-gray-700">
+              Video {video}
             </div>
-          ))}
-        </CardBody>
-      </Card>
+            <CardBody className="p-2">
+              <Typography variant="small" className="font-semibold">
+                Video sugerido {video}
+              </Typography>
+              <Typography variant="paragraph" className="text-gray-600 text-sm">
+                Descripción breve del video sugerido {video}.
+              </Typography>
+            </CardBody>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
 
-
-export default Ubicacion;
+export default ubicacion;*/

@@ -6,7 +6,7 @@ import {
   ServerStackIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Ubicacion,configuracion,Historial,Guardados } from "@/pages/dashboard";
+import { Home, Profile, Ubicacion,configuracion,historial,Guardados } from "@/pages/dashboard";
 import { SignIn, SignUp  } from "@/pages/auth";
 import { RecoverPassword } from "@/pages/auth/contraseña";
 const icon = {
@@ -33,7 +33,7 @@ export const routes = [
         icon: <HomeIcon {...icon} />,
         name: "Historial",
         path: "/historial",
-        element: <Historial />,
+        element: <historial />,
       },
       {
         icon: <HomeIcon {...icon} />,
