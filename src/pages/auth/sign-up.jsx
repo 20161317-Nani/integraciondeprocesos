@@ -1,30 +1,55 @@
-import {
-  Card,
-  Input,
-  Button,
-  Typography,
-} from "@material-tailwind/react";
+import { useEffect } from "react";
+import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
+import { useMaterialTailwindController } from "@/context";
 
 export function SignUp() {
-  return (
-    <section className="flex items-center justify-center min-h-screen bg-blue-100">
-      <Card shadow={true} className="flex flex-col lg:flex-row w-full max-w-5xl p-6 bg-white rounded-2xl">
+  const [controller] = useMaterialTailwindController();
+  const { darkMode } = controller; // 🌙 Estado global de modo oscuro
 
+  // Aplica la clase 'dark' al <html> según el estado global
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  }, [darkMode]);
+
+  return (
+    <section
+      className={`flex items-center justify-center min-h-screen transition-colors duration-300 ${
+        darkMode ? "bg-gray-900" : "bg-blue-100"
+      }`}
+    >
+      <Card
+        shadow={true}
+        className={`flex flex-col lg:flex-row w-full max-w-5xl p-6 rounded-2xl transition-colors duration-300 ${
+          darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-800"
+        }`}
+      >
         {/* Imagen lado izquierdo */}
         <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
           <img
             src="https://via.placeholder.com/400x400"
             alt="Login"
-            className="rounded-2xl object-cover w-full h-full"
+            className={`rounded-2xl object-cover w-full h-full transition duration-300 ${
+              darkMode ? "filter brightness-75" : ""
+            }`}
           />
         </div>
 
         {/* Formulario lado derecho */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center p-6">
           <div className="text-center mb-6">
-            <Typography variant="h3" className="font-bold">¡Bienvenido de nuevo!</Typography>
-            <Typography color="gray" className="mt-1 text-sm">
+            <Typography variant="h3" className="font-bold">
+              ¡Bienvenido de nuevo!
+            </Typography>
+            <Typography
+              color={darkMode ? "white" : "gray"}
+              className="mt-1 text-sm"
+            >
               Te extrañamos
             </Typography>
           </div>
@@ -33,7 +58,10 @@ export function SignUp() {
             <Input size="lg" label="Correo Electrónico" type="email" />
             <Input size="lg" label="Contraseña" type="password" />
 
-            <Typography color="blue-600" className="text-sm text-right hover:underline cursor-pointer">
+            <Typography
+              color="blue-600"
+              className="text-sm text-right hover:underline cursor-pointer"
+            >
               ¿Olvidaste tu contraseña?
             </Typography>
 
@@ -71,7 +99,12 @@ export function SignUp() {
                 </g>
                 <defs>
                   <clipPath id="clip0">
-                    <rect width="16" height="16" fill="white" transform="translate(0.5)" />
+                    <rect
+                      width="16"
+                      height="16"
+                      fill="white"
+                      transform="translate(0.5)"
+                    />
                   </clipPath>
                 </defs>
               </svg>
