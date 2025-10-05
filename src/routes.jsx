@@ -1,54 +1,57 @@
+// routes.js
 import {
   HomeIcon,
   UserCircleIcon,
-  TableCellsIcon,
-  InformationCircleIcon,
+  MapIcon,
+  ClockIcon,
+  BookmarkIcon,
+  Cog6ToothIcon,
   ServerStackIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Ubicacion,Configuracion,Historial,Guardados } from "@/pages/dashboard";
-import { SignIn, SignUp  } from "@/pages/auth";
+
+import { Home, Profile, Ubicacion, Configuracion, Historial, Guardados } from "@/pages/dashboard";
+import { SignIn, SignUp } from "@/pages/auth";
 import { RecoverPassword } from "@/pages/auth/contraseña";
-const icon = {
-  className: "w-5 h-5 text-inherit",
-};
+
+const iconProps = { className: "w-5 h-5 text-inherit" };
 
 export const routes = [
   {
     layout: "dashboard",
     pages: [
       {
-        icon: <HomeIcon {...icon} />,
-        name: "dashboard",
+        icon: <HomeIcon {...iconProps} />,
+        name: "Dashboard",
         path: "/home",
         element: <Home />,
       },
       {
-        icon: <HomeIcon {...icon} />,
+        icon: <MapIcon {...iconProps} />,
         name: "Ubicacion",
         path: "/ubicacion",
         element: <Ubicacion />,
       },
       {
-        icon: <HomeIcon {...icon} />,
+        icon: <ClockIcon {...iconProps} />,
         name: "Historial",
         path: "/historial",
         element: <Historial />,
       },
       {
-        icon: <HomeIcon {...icon} />,
+        icon: <BookmarkIcon {...iconProps} />,
         name: "Guardados",
         path: "/guardados",
         element: <Guardados />,
       },
       {
-        icon: <HomeIcon {...icon} />,
+        icon: <Cog6ToothIcon {...iconProps} />,
         name: "Configuracion",
         path: "/configuracion",
         element: <Configuracion />,
       },
       {
-        icon: <UserCircleIcon {...icon} />,
+        icon: <UserCircleIcon {...iconProps} />,
         name: "Perfil",
         path: "/profile",
         element: <Profile />,
@@ -60,20 +63,20 @@ export const routes = [
     layout: "auth",
     pages: [
       {
-        icon: <ServerStackIcon {...icon} />,
-        name: "sign in",
+        icon: <ServerStackIcon {...iconProps} />,
+        name: "Sign In",
         path: "/sign-in",
         element: <SignIn />,
       },
       {
-        icon: <RectangleStackIcon {...icon} />,
-        name: "sign up",
+        icon: <RectangleStackIcon {...iconProps} />,
+        name: "Sign Up",
         path: "/sign-up",
         element: <SignUp />,
       },
       {
-        icon: <RectangleStackIcon {...icon} />,
-        name: "Recuperar contraseña",
+        icon: <RectangleStackIcon {...iconProps} />,
+        name: "Recuperar Contraseña",
         path: "/contraseña",
         element: <RecoverPassword />,
       },
@@ -82,3 +85,4 @@ export const routes = [
 ];
 
 export default routes;
+
