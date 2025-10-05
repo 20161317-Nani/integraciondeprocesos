@@ -6,7 +6,7 @@ import {
   ServerStackIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications, Ubicacion } from "@/pages/dashboard";
+import { Home, Profile, Ubicacion,configuracion,Historial,Guardados } from "@/pages/dashboard";
 import { SignIn, SignUp  } from "@/pages/auth";
 import { RecoverPassword } from "@/pages/auth/contraseña";
 const icon = {
