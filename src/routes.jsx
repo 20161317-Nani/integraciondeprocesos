@@ -33,7 +33,7 @@ export const routes = [
         icon: <HomeIcon {...icon} />,
         name: "Historial",
         path: "/historial",
-        element: <Historial />,
+        element: <historial />,
       },
       {
         icon: <HomeIcon {...icon} />,
