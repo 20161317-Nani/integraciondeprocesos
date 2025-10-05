@@ -27,7 +27,7 @@ import {
 } from "@/data";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
 
-export function configuracion() {
+export function Configuracion() {
   return (
     <div className="mt-12 flex flex-col md:flex-row gap-4">
       {/* Contenedor principal de video + sugeridos */}
@@ -73,4 +73,4 @@ export function configuracion() {
 }
 
 
-export default configuracion;
+export default Configuracion;
