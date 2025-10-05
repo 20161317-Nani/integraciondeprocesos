@@ -1,5 +1,6 @@
 import React from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { setDarkMode } from "@/context";
 import {
   Button,
   IconButton,
@@ -65,9 +66,8 @@ export function Configurator() {
 
   return (
     <aside
-      className={`fixed top-0 right-0 z-50 h-screen w-96 bg-white px-2.5 shadow-lg transition-transform duration-300 ${
-        openConfigurator ? "translate-x-0" : "translate-x-96"
-      }`}
+      className={`fixed top-0 right-0 z-50 h-screen w-96 bg-white px-2.5 shadow-lg transition-transform duration-300 ${openConfigurator ? "translate-x-0" : "translate-x-96"
+        }`}
     >
       <div className="flex items-start justify-between px-6 pt-8 pb-6">
         <div>
@@ -92,11 +92,9 @@ export function Configurator() {
             {Object.keys(sidenavColors).map((color) => (
               <span
                 key={color}
-                className={`h-6 w-6 cursor-pointer rounded-full border bg-gradient-to-br transition-transform hover:scale-105 ${
-                  sidenavColors[color]
-                } ${
-                  sidenavColor === color ? "border-black" : "border-transparent"
-                }`}
+                className={`h-6 w-6 cursor-pointer rounded-full border bg-gradient-to-br transition-transform hover:scale-105 ${sidenavColors[color]
+                  } ${sidenavColor === color ? "border-black" : "border-transparent"
+                  }`}
                 onClick={() => setSidenavColor(dispatch, color)}
               />
             ))}
@@ -139,6 +137,17 @@ export function Configurator() {
               onChange={() => setFixedNavbar(dispatch, !fixedNavbar)}
             />
           </div>
+          <div className="flex items-center justify-between py-5">
+            <Typography variant="h6" color="blue-gray">
+              Modo Oscuro
+            </Typography>
+            <Switch
+              id="dark-mode"
+              checked={controller.darkMode}
+              onChange={() => setDarkMode(dispatch, !controller.darkMode)}
+            />
+          </div>
+
           <hr />
         </div>
       </div>
