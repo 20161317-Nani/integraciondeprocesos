@@ -1,0 +1,72 @@
+[33mfec0f1e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mMaxlogin[m[33m)[m Agregamos logica para agregar usuarios y ver cambios en el front
+[33mebb4b55[m Add files via upload
+[33mb301627[m cambios de video
+[33m1b4984e[m Nuevos cambios
+[33m2e7c72a[m Merge branch 'main' of https://github.com/20161317-Nani/integraciondeprocesos
+[33m22c8627[m cambios del perfil
+[33m735c96e[m Update README.md
+[33m55cdf84[m subiendo todo el proyecto
+[33md431402[m primeros cambios
+[33m721f312[m Merge pull request #46 from cristim67/main
+[33m353ed9e[m Deploy on Genezio
+[33m9fdc896[m Merge pull request #36 from maisamaf/feature/v3
+[33mb28a39a[m update change log
+[33m879fd18[m ready for release
+[33m6e33c38[m update the design
+[33m2aadbbf[m ref: signin & signup pages
+[33m32c0fd7[m ref: add border to components
+[33m985af21[m fix design issues
+[33mde3e0b9[m fix the issues
+[33m5c1edc5[m ref: update colors
+[33m323c2dd[m fix: implement upgrade changes
+[33m5b32cf9[m upgrade to Material Tailwind v2
+[33mc082d2c[m Update index.html
+[33mfbe30e0[m Update README.md
+[33m22ffe2f[m Merge pull request #31 from creativetimofficial/feature/v2.0.1
+[33m2f40bf1[m add nepcha script
+[33m94d1302[m Merge pull request #30 from creativetimofficial/dev-main
+[33mc7e97f9[m update content
+[33m9418528[m update readme file
+[33m12f54dc[m update changelog
+[33m0f458a6[m update dashboard and its layouts
+[33meabd5a6[m update readme
+[33mf1c8572[m update the buttons type
+[33md3dd9ec[m update timeline for home page
+[33m8f32166[m remove unused dependencies
+[33m3305484[m change buttons type
+[33m1748844[m update project
+[33mb174914[m add issue template
+[33mc3a787b[m add readme, changelog and license
+[33mf473c6e[m update package.json
+[33m1cb809a[m build the auth pages
+[33mb6827b0[m update tables
+[33m8223cdf[m build the tables page
+[33m4e8fdb3[m build the profile page
+[33mc3fd85c[m update home page
+[33m8988fc9[m update sidenav
+[33ma4b59b9[m update dashboard-navbar
+[33m0a5021b[m update dashboard-footer
+[33maecba81[m update the context
+[33m6098ecb[m add react tailwind timeline
+[33m0a203d0[m update sidenav
+[33ma4ef46e[m add home page
+[33m960ae1b[m update dashboard layout
+[33mbad2d36[m add data for dashboard home page
+[33m675ac45[m add assets
+[33m0ffe59c[m update dashboard-navbar
+[33mec27d2e[m add dashboard footer
+[33ma6cf814[m add statistics-chart
+[33m5d13b14[m add statistics-card
+[33m7f61379[m update dashboard layout
+[33mc34a444[m add charts configs
+[33ma06ed6d[m add charts configs
+[33maca41c1[m add exports point for widgets
+[33m496edd7[m add layouts exports
+[33m1fc597b[m add sidenav
+[33m90538d8[m add dashboard navbar
+[33m1520f72[m add dashboard footer
+[33md3da5cf[m add configurator
+[33mefb979c[m add dashboard layout
+[33m8b15a03[m create the context
+[33md6523d7[m add routes
+[33m74fe88e[m initialize  the project

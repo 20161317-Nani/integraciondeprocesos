@@ -5,7 +5,7 @@ import { useMaterialTailwindController } from "@/context";
 
 export function SignIn() {
   const [controller] = useMaterialTailwindController();
-  const { darkMode } = controller; // 🌙 Estado global del modo oscuro
+  const { darkMode } = controller; // 🌙 Estado global de modo oscuro
 
   // Aplica la clase 'dark' al <html> según el estado global
   useEffect(() => {
@@ -23,7 +23,6 @@ export function SignIn() {
         darkMode ? "bg-gray-900" : "bg-blue-100"
       }`}
     >
-      {/* Card contenedor */}
       <Card
         shadow={true}
         className={`flex flex-col lg:flex-row w-full max-w-5xl p-6 rounded-2xl transition-colors duration-300 ${
@@ -33,8 +32,8 @@ export function SignIn() {
         {/* Imagen lado izquierdo */}
         <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
           <img
-            src="/img/pattern.png"
-            alt="Registro"
+            src="https://via.placeholder.com/400x400"
+            alt="Login"
             className={`rounded-2xl object-cover w-full h-full transition duration-300 ${
               darkMode ? "filter brightness-75" : ""
             }`}
@@ -45,39 +44,49 @@ export function SignIn() {
         <div className="w-full lg:w-1/2 flex flex-col justify-center p-6">
           <div className="text-center mb-6">
             <Typography variant="h3" className="font-bold">
-              Registro
+              ¡Bienvenido de nuevo!
             </Typography>
             <Typography
               color={darkMode ? "white" : "gray"}
               className="mt-1 text-sm"
             >
-              Completa los siguientes campos para crear tu cuenta
+              Te extrañamos
+            </Typography>
+            <br></br>
+             <Typography
+              color="blue-600"
+              className="text-sm text-right "
+            >
+              No estas registrado?
+              
+              <Link to="/auth/sign-up"
+              className="text-blue-600 ml-1 font-medium hover:underline cursor-pointer"
+              >
+                Crea una cuenta
+              </Link>
             </Typography>
           </div>
 
           <form className="flex flex-col gap-6">
-            <Input size="lg" label="Nombre" />
-            <Input size="lg" label="Apellidos" />
             <Input size="lg" label="Correo Electrónico" type="email" />
             <Input size="lg" label="Contraseña" type="password" />
 
+            <Typography
+              color="blue-600"
+              className="text-sm text-right "
+            >
+              ¿Olvidaste tu contraseña?
+              <Link to="/auth/contraseña"
+              className="text-blue-600 ml-1 font-medium hover:underline cursor-pointer"
+              >
+                Recuperala
+              </Link>
+            </Typography>
+
             <Button className="mt-4" fullWidth>
-              Registrarse
+              Iniciar sesión
             </Button>
           </form>
-
-          <Typography
-            color={darkMode ? "white" : "gray"}
-            className="mt-4 text-center text-sm"
-          >
-            ¿Ya tienes una cuenta?
-            <Link
-              to="/auth/sign-up"
-              className="text-blue-600 ml-1 font-medium"
-            >
-              Inicia sesión
-            </Link>
-          </Typography>
 
           {/* Botón Google */}
           <div className="mt-6">
@@ -87,7 +96,6 @@ export function SignIn() {
               className="flex items-center gap-2 justify-center shadow-md"
               fullWidth
             >
-              {/* Logo de Google */}
               <svg width="17" height="16" viewBox="0 0 17 16" fill="none">
                 <g clipPath="url(#clip0)">
                   <path
@@ -118,11 +126,12 @@ export function SignIn() {
                   </clipPath>
                 </defs>
               </svg>
-
-              <span>Registrarse con Google</span>
+              <span>Iniciar sesión con Google</span>
             </Button>
           </div>
         </div>
+
+        
       </Card>
     </section>
   );

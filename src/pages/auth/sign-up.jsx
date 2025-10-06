@@ -5,7 +5,7 @@ import { useMaterialTailwindController } from "@/context";
 
 export function SignUp() {
   const [controller] = useMaterialTailwindController();
-  const { darkMode } = controller; // 🌙 Estado global de modo oscuro
+  const { darkMode } = controller; // 🌙 Estado global del modo oscuro
 
   // Aplica la clase 'dark' al <html> según el estado global
   useEffect(() => {
@@ -23,6 +23,7 @@ export function SignUp() {
         darkMode ? "bg-gray-900" : "bg-blue-100"
       }`}
     >
+      {/* Card contenedor */}
       <Card
         shadow={true}
         className={`flex flex-col lg:flex-row w-full max-w-5xl p-6 rounded-2xl transition-colors duration-300 ${
@@ -32,8 +33,8 @@ export function SignUp() {
         {/* Imagen lado izquierdo */}
         <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
           <img
-            src="https://via.placeholder.com/400x400"
-            alt="Login"
+            src="/img/pattern.png"
+            alt="Registro"
             className={`rounded-2xl object-cover w-full h-full transition duration-300 ${
               darkMode ? "filter brightness-75" : ""
             }`}
@@ -44,31 +45,39 @@ export function SignUp() {
         <div className="w-full lg:w-1/2 flex flex-col justify-center p-6">
           <div className="text-center mb-6">
             <Typography variant="h3" className="font-bold">
-              ¡Bienvenido de nuevo!
+              Registro
             </Typography>
             <Typography
               color={darkMode ? "white" : "gray"}
               className="mt-1 text-sm"
             >
-              Te extrañamos
+              Completa los siguientes campos para crear tu cuenta
             </Typography>
           </div>
 
           <form className="flex flex-col gap-6">
+            <Input size="lg" label="Nombre" />
+            <Input size="lg" label="Apellidos" />
             <Input size="lg" label="Correo Electrónico" type="email" />
             <Input size="lg" label="Contraseña" type="password" />
 
-            <Typography
-              color="blue-600"
-              className="text-sm text-right hover:underline cursor-pointer"
-            >
-              ¿Olvidaste tu contraseña?
-            </Typography>
-
             <Button className="mt-4" fullWidth>
-              Iniciar sesión
+              Registrarse
             </Button>
           </form>
+
+          <Typography
+            color={darkMode ? "white" : "gray"}
+            className="mt-4 text-center text-sm"
+          >
+            ¿Ya tienes una cuenta?
+            <Link
+              to="/auth/sign-in"
+              className="text-blue-600 ml-1 font-medium hover:underline cursor-pointer"
+            >
+              Inicia sesión
+            </Link>
+          </Typography>
 
           {/* Botón Google */}
           <div className="mt-6">
@@ -78,6 +87,7 @@ export function SignUp() {
               className="flex items-center gap-2 justify-center shadow-md"
               fullWidth
             >
+              {/* Logo de Google */}
               <svg width="17" height="16" viewBox="0 0 17 16" fill="none">
                 <g clipPath="url(#clip0)">
                   <path
@@ -108,7 +118,8 @@ export function SignUp() {
                   </clipPath>
                 </defs>
               </svg>
-              <span>Iniciar sesión con Google</span>
+
+              <span>Registrarse con Google</span>
             </Button>
           </div>
         </div>
