@@ -1,20 +1,43 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
 import { useMaterialTailwindController } from "@/context";
 
+// Colecciones de imágenes por tema y modo
+const imageSets = {
+  light: [
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80", // laptop moderna
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80", // playa
+    "https://images.unsplash.com/photo-1522199710521-72d69614c702?auto=format&fit=crop&w=1200&q=80", // oficina
+    "https://images.unsplash.com/photo-1486308510493-aa64833634ef?auto=format&fit=crop&w=1200&q=80", // ciudad
+    "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1200&q=80", // naturaleza
+  ],
+  dark: [
+    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80", // código nocturno
+    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=1200&q=80", // ciudad de noche
+    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80", // auroras
+    "https://images.unsplash.com/photo-1533025784049-38f3f9f2b2f8?auto=format&fit=crop&w=1200&q=80", // paisaje montañoso
+    "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1200&q=80", // bosque oscuro
+  ],
+};
+
 export function SignIn() {
   const [controller] = useMaterialTailwindController();
-  const { darkMode } = controller; // 🌙 Estado global de modo oscuro
+  const { darkMode } = controller;
+  const [image, setImage] = useState("");
 
-  // Aplica la clase 'dark' al <html> según el estado global
+  // 🌙 Cambia la imagen aleatoriamente al montar el componente
+  useEffect(() => {
+    const selectedImages = darkMode ? imageSets.dark : imageSets.light;
+    const randomIndex = Math.floor(Math.random() * selectedImages.length);
+    setImage(selectedImages[randomIndex]);
+  }, [darkMode]);
+
+  // Aplica la clase 'dark' al <html>
   useEffect(() => {
     const root = document.documentElement;
-    if (darkMode) {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+    if (darkMode) root.classList.add("dark");
+    else root.classList.remove("dark");
   }, [darkMode]);
 
   return (
@@ -32,9 +55,9 @@ export function SignIn() {
         {/* Imagen lado izquierdo */}
         <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
           <img
-            src="https://via.placeholder.com/400x400"
+            src={image}
             alt="Login"
-            className={`rounded-2xl object-cover w-full h-full transition duration-300 ${
+            className={`rounded-2xl object-cover w-full h-full transition-all duration-500 ${
               darkMode ? "filter brightness-75" : ""
             }`}
           />
@@ -52,15 +75,13 @@ export function SignIn() {
             >
               Te extrañamos
             </Typography>
-            <br></br>
-             <Typography
-              color="blue-600"
-              className="text-sm text-right "
-            >
-              No estas registrado?
-              
-              <Link to="/auth/sign-up"
-              className="text-blue-600 ml-1 font-medium hover:underline cursor-pointer"
+
+            <br />
+            <Typography color="blue-600" className="text-sm text-right">
+              ¿No estás registrado?
+              <Link
+                to="/auth/sign-up"
+                className="text-blue-600 ml-1 font-medium hover:underline cursor-pointer"
               >
                 Crea una cuenta
               </Link>
@@ -71,15 +92,13 @@ export function SignIn() {
             <Input size="lg" label="Correo Electrónico" type="email" />
             <Input size="lg" label="Contraseña" type="password" />
 
-            <Typography
-              color="blue-600"
-              className="text-sm text-right "
-            >
+            <Typography color="blue-600" className="text-sm text-right">
               ¿Olvidaste tu contraseña?
-              <Link to="/auth/contraseña"
-              className="text-blue-600 ml-1 font-medium hover:underline cursor-pointer"
+              <Link
+                to="/auth/contraseña"
+                className="text-blue-600 ml-1 font-medium hover:underline cursor-pointer"
               >
-                Recuperala
+                Recupérala
               </Link>
             </Typography>
 
@@ -130,8 +149,6 @@ export function SignIn() {
             </Button>
           </div>
         </div>
-
-        
       </Card>
     </section>
   );

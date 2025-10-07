@@ -5,10 +5,36 @@ import { useMaterialTailwindController } from "@/context";
 
 export function SignUp() {
   const [controller] = useMaterialTailwindController();
-  const { darkMode } = controller; // 🌙 Estado global del modo oscuro
+  const { darkMode } = controller;
 
-// --- LÓGICA DEL FORMULARIO ---
-  // 2. Estado para guardar los datos del formulario
+  // Conjuntos de imágenes de Unsplash
+  const lightImages = [
+    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80", // equipo trabajando
+    "https://images.unsplash.com/photo-1508780709619-79562169bc64?auto=format&fit=crop&w=1200&q=80", // paisaje natural
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80", // retrato persona feliz
+    "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80", // coworking oficina
+    "https://images.unsplash.com/photo-1520975918318-3bb2c3c1f259?auto=format&fit=crop&w=1200&q=80", // ciudad moderna
+  ];
+
+  const darkImages = [
+    "https://images.unsplash.com/photo-1517816428104-797678c7cf8b?auto=format&fit=crop&w=1200&q=80", // ciudad de noche
+    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80", // paisaje montañoso oscuro
+    "https://images.unsplash.com/photo-1505685296765-3a2736de412f?auto=format&fit=crop&w=1200&q=80", // animales nocturnos
+    "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80", // tecnología en modo oscuro
+    "https://images.unsplash.com/photo-1505245208761-ba872912fac0?auto=format&fit=crop&w=1200&q=80", // cielo estrellado
+  ];
+
+  // Estado para imagen actual
+  const [image, setImage] = useState("");
+
+  // Cada vez que entra al componente o cambia el modo, selecciona aleatoriamente una imagen
+  useEffect(() => {
+    const images = darkMode ? darkImages : lightImages;
+    const randomImage = images[Math.floor(Math.random() * images.length)];
+    setImage(randomImage);
+  }, [darkMode]);
+
+  // --- Lógica del formulario ---
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
@@ -16,42 +42,34 @@ export function SignUp() {
     password: "",
   });
 
-  // 3. Función para actualizar el estado cuando el usuario escribe
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
-  // 4. Función para enviar los datos al backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Error en el registro');
-      
-      alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
-      // Opcional: Redirigir al login
-      window.location.href = '/auth/sign-in';
 
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Error en el registro");
+
+      alert("¡Registro exitoso! Ahora puedes iniciar sesión.");
+      window.location.href = "/auth/sign-in";
     } catch (error) {
       alert(error.message);
     }
   };
-  // --- FIN LÓGICA DEL FORMULARIO ---
+  // --- Fin lógica formulario ---
 
-
-  // Aplica la clase 'dark' al <html> según el estado global
+  // Aplica modo oscuro global
   useEffect(() => {
     const root = document.documentElement;
-    if (darkMode) {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+    if (darkMode) root.classList.add("dark");
+    else root.classList.remove("dark");
   }, [darkMode]);
 
   return (
@@ -60,25 +78,24 @@ export function SignUp() {
         darkMode ? "bg-gray-900" : "bg-blue-100"
       }`}
     >
-      {/* Card contenedor */}
       <Card
         shadow={true}
         className={`flex flex-col lg:flex-row w-full max-w-5xl p-6 rounded-2xl transition-colors duration-300 ${
           darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-800"
         }`}
       >
-        {/* Imagen lado izquierdo */}
+        {/* Imagen aleatoria */}
         <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
           <img
-            src="/img/pattern.png"
+            src={image}
             alt="Registro"
-            className={`rounded-2xl object-cover w-full h-full transition duration-300 ${
+            className={`rounded-2xl object-cover w-full h-full transition-all duration-700 ${
               darkMode ? "filter brightness-75" : ""
             }`}
           />
         </div>
 
-        {/* Formulario lado derecho */}
+        {/* Formulario */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center p-6">
           <div className="text-center mb-6">
             <Typography variant="h3" className="font-bold">
@@ -93,10 +110,36 @@ export function SignUp() {
           </div>
 
           <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-            <Input size="lg" label="Nombre" name="nombre" value={formData.nombre} onChange={handleChange} />
-            <Input size="lg" label="Apellidos" name="apellido" value={formData.apellido} onChange={handleChange} />
-            <Input size="lg" label="Correo Electrónico" type="email" name="correo" value={formData.correo} onChange={handleChange} />
-            <Input size="lg" label="Contraseña" type="password" name="password" value={formData.password} onChange={handleChange} />
+            <Input
+              size="lg"
+              label="Nombre"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleChange}
+            />
+            <Input
+              size="lg"
+              label="Apellidos"
+              name="apellido"
+              value={formData.apellido}
+              onChange={handleChange}
+            />
+            <Input
+              size="lg"
+              label="Correo Electrónico"
+              type="email"
+              name="correo"
+              value={formData.correo}
+              onChange={handleChange}
+            />
+            <Input
+              size="lg"
+              label="Contraseña"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
 
             <Button type="submit" className="mt-4" fullWidth>
               Registrarse
@@ -124,7 +167,6 @@ export function SignUp() {
               className="flex items-center gap-2 justify-center shadow-md"
               fullWidth
             >
-              {/* Logo de Google */}
               <svg width="17" height="16" viewBox="0 0 17 16" fill="none">
                 <g clipPath="url(#clip0)">
                   <path
