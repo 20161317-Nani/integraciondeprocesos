@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const User = require('../models/usuarios'); // Importa el modelo
+const jwt = require('jsonwebtoken');
 
 // @ruta    POST /api/auth/register
 // @desc    Registrar un nuevo usuario
@@ -40,5 +41,52 @@ router.post('/register', async (req, res) => {
     res.status(500).send('Error en el servidor.');
   }
 });
+
+// LINEA PARA validación del LOGIN
+
+// @ruta    POST /api/auth/login
+// @desc    Autenticar un usuario y devolver un token
+// @acceso  Público
+router.post('/login', async (req, res) => {
+  // 1. Extraer correo y password del cuerpo de la petición
+  const { correo, password } = req.body;
+
+  try {
+    // 2. Buscar al usuario por su correo en la BD
+    let user = await User.findOne({ correo });
+    if (!user) {
+      // Si el usuario no existe, enviamos un error genérico
+      return res.status(400).json({ message: 'Credenciales no válidas' });
+    }
+
+    // 3. Comparar la contraseña enviada con la guardada (hasheada) en la BD
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      // Si las contraseñas no coinciden, enviamos el mismo error genérico
+      return res.status(400).json({ message: 'Credenciales no válidas' });
+    }
+
+    // 4. Si las credenciales son correctas, creamos el "pase de acceso" (Token)
+    const payload = {
+      user: {
+        id: user.id, // Guardamos el ID del usuario en el token
+      },
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET, // Usamos la palabra secreta del .env
+      { expiresIn: '5h' },   // El token expira en 5 horas
+      (err, token) => {
+        if (err) throw err;
+        res.json({ token }); // Enviamos el token al frontend
+      }
+    );
+  } catch (error) {
+    console.error('Error en el login:', error.message);
+    res.status(500).send('Error en el servidor.');
+  }
+});
+
 
 module.exports = router;
