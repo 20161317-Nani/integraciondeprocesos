@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
 import { useMaterialTailwindController } from "@/context";
@@ -6,6 +6,43 @@ import { useMaterialTailwindController } from "@/context";
 export function SignUp() {
   const [controller] = useMaterialTailwindController();
   const { darkMode } = controller; // 🌙 Estado global del modo oscuro
+
+// --- LÓGICA DEL FORMULARIO ---
+  // 2. Estado para guardar los datos del formulario
+  const [formData, setFormData] = useState({
+    nombre: "",
+    apellido: "",
+    correo: "",
+    password: "",
+  });
+
+  // 3. Función para actualizar el estado cuando el usuario escribe
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // 4. Función para enviar los datos al backend
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Error en el registro');
+      
+      alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+      // Opcional: Redirigir al login
+      window.location.href = '/auth/sign-in';
+
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  // --- FIN LÓGICA DEL FORMULARIO ---
+
 
   // Aplica la clase 'dark' al <html> según el estado global
   useEffect(() => {
@@ -55,13 +92,13 @@ export function SignUp() {
             </Typography>
           </div>
 
-          <form className="flex flex-col gap-6">
-            <Input size="lg" label="Nombre" />
-            <Input size="lg" label="Apellidos" />
-            <Input size="lg" label="Correo Electrónico" type="email" />
-            <Input size="lg" label="Contraseña" type="password" />
+          <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+            <Input size="lg" label="Nombre" name="nombre" value={formData.nombre} onChange={handleChange} />
+            <Input size="lg" label="Apellidos" name="apellido" value={formData.apellido} onChange={handleChange} />
+            <Input size="lg" label="Correo Electrónico" type="email" name="correo" value={formData.correo} onChange={handleChange} />
+            <Input size="lg" label="Contraseña" type="password" name="password" value={formData.password} onChange={handleChange} />
 
-            <Button className="mt-4" fullWidth>
+            <Button type="submit" className="mt-4" fullWidth>
               Registrarse
             </Button>
           </form>
