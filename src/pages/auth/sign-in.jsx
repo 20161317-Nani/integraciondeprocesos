@@ -26,39 +26,22 @@ export function SignIn() {
   const [controller] = useMaterialTailwindController();
   const { darkMode } = controller;
 
-  // Imagen inicial (no cambia al recargar)
+  // Imagen inicial que aparece instantáneamente
   const selectedImages = darkMode ? imageSets.dark : imageSets.light;
   const [image] = useState(() => {
     const randomIndex = Math.floor(Math.random() * selectedImages.length);
     return selectedImages[randomIndex];
   });
 
-  // Estado de visibilidad y validación de contraseña
+  // Estado para mostrar/ocultar contraseña
   const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState("");
-  const [validation, setValidation] = useState({
-    length: false,
-    upper: false,
-    number: false,
-    symbol: false,
-  });
 
-  // Cambiar modo dark en HTML
+  // Control del modo oscuro
   useEffect(() => {
     const root = document.documentElement;
     if (darkMode) root.classList.add("dark");
     else root.classList.remove("dark");
   }, [darkMode]);
-
-  // Validaciones de contraseña
-  useEffect(() => {
-    setValidation({
-      length: password.length >= 8,
-      upper: /[A-Z]/.test(password),
-      number: /[0-9]/.test(password),
-      symbol: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-    });
-  }, [password]);
 
   return (
     <section
@@ -95,6 +78,7 @@ export function SignIn() {
             >
               Te extrañamos
             </Typography>
+
             <br />
             <Typography color="blue-600" className="text-sm text-right">
               ¿No estás registrado?
@@ -116,8 +100,6 @@ export function SignIn() {
                 size="lg"
                 label="Contraseña"
                 type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
@@ -130,38 +112,6 @@ export function SignIn() {
                   <EyeIcon className="h-5 w-5" />
                 )}
               </button>
-            </div>
-
-            {/* Validaciones visuales */}
-            <div className="text-sm space-y-1">
-              <p
-                className={`${
-                  validation.length ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                • Mínimo 8 caracteres
-              </p>
-              <p
-                className={`${
-                  validation.upper ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                • Al menos una mayúscula
-              </p>
-              <p
-                className={`${
-                  validation.number ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                • Al menos un número
-              </p>
-              <p
-                className={`${
-                  validation.symbol ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                • Al menos un símbolo
-              </p>
             </div>
 
             <Typography color="blue-600" className="text-sm text-right">
@@ -227,4 +177,3 @@ export function SignIn() {
 }
 
 export default SignIn;
-
