@@ -89,14 +89,16 @@ export function SignIn() {
         }`}
       >
         {/* Imagen lado izquierdo */}
-        <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
-          <img
-            src={image}
-            alt="Login"
-            className={`rounded-2xl object-cover w-full h-full transition-all duration-500 ${
-              darkMode ? "filter brightness-75" : ""
-            }`}
-          />
+       <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
+          {image && ( // Condición para esperar la URL
+            <img
+              src={image}
+              alt="Login"
+              className={`rounded-2xl object-cover w-full h-full transition-all duration-500 ${
+                darkMode ? "filter brightness-75" : ""
+              }`}
+            />
+          )}
         </div>
 
         {/* Formulario lado derecho */}

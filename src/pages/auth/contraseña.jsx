@@ -8,8 +8,6 @@ import {
 import { Link } from "react-router-dom";
 import { useMaterialTailwindController } from "@/context";
 
-// 👇 TODA LA LÓGICA DEBE IR ANTES DEL RETURN
-
 // Colecciones de imágenes por tema y modo
 const imageSets = {
   light: [

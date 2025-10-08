@@ -109,7 +109,7 @@ router.post('/forgot-password', async (req, res) => {
     await user.save();
 
     // 3. Crear el link de reseteo
-    const resetUrl = `http://localhost:5173/ResetearContra/${resetToken}`;
+    const resetUrl = `http://localhost:5173/auth/ResetearContra/${resetToken}`;
     const message = `Has solicitado un reseteo de contraseña. Por favor, haz clic en el siguiente enlace para establecer una nueva contraseña:\n\n${resetUrl}\n\nSi no has sido tú, ignora este correo.`;
 
     // 4. Configurar y enviar el correo
