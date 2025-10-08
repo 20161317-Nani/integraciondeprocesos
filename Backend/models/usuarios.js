@@ -6,7 +6,13 @@ const UserSchema = new mongoose.Schema({
   correo: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   date: { type: Date, default: Date.now },
+
+  // Campos para recuperar la contraseña
+  resetPasswordToken: String,
+  resetPasswordExpire: Date,
+
 });
+
 
 module.exports = mongoose.model('usuario', UserSchema);
 

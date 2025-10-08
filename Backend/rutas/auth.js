@@ -1,8 +1,10 @@
+const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const User = require('../models/usuarios'); // Importa el modelo
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 // @ruta    POST /api/auth/register
 // @desc    Registrar un nuevo usuario
@@ -85,6 +87,85 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Error en el login:', error.message);
     res.status(500).send('Error en el servidor.');
+  }
+});
+
+// --- RUTA PARA SOLICITAR EL RESETEO DE CONTRASEÑA ---
+router.post('/forgot-password', async (req, res) => {
+  const { correo } = req.body;
+  try {
+    const user = await User.findOne({ correo });
+    if (!user) {
+      // Por seguridad, no revelamos si el usuario existe o no
+      return res.status(200).json({ message: 'Si el correo está registrado, recibirás un email con instrucciones.' });
+    }
+
+    // 1. Generar un token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    
+    // 2. Guardar el token (hasheado) y la fecha de expiración en la BD
+    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // Expira en 10 minutos
+    await user.save();
+
+    // 3. Crear el link de reseteo
+    const resetUrl = `http://localhost:5173/ResetearContra/${resetToken}`;
+    const message = `Has solicitado un reseteo de contraseña. Por favor, haz clic en el siguiente enlace para establecer una nueva contraseña:\n\n${resetUrl}\n\nSi no has sido tú, ignora este correo.`;
+
+    // 4. Configurar y enviar el correo
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',      
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Tu App" <${process.env.EMAIL_USER}>`,
+      to: user.correo,
+      subject: 'Reseteo de Contraseña',
+      text: message,
+    });
+    
+    res.status(200).json({ message: 'Si el correo está registrado, recibirás un email con instrucciones.' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
+
+// --- RUTA PARA REALIZAR EL RESETEO DE CONTRASEÑA ---
+router.put('/ResetearContra/:resetToken', async (req, res) => {
+  try {
+    const hashedToken = crypto.createHash('sha256').update(req.params.resetToken).digest('hex');
+
+    // Buscar al usuario por el token hasheado y que no haya expirado
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'El token es inválido o ha expirado.' });
+    }
+
+    // Establecer la nueva contraseña
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(req.body.password, salt);
+    
+    // Limpiar los campos del token
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    
+    await user.save();
+
+    res.status(200).json({ message: 'Contraseña actualizada exitosamente.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error en el servidor');
   }
 });
 

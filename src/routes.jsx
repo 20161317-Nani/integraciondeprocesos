@@ -11,8 +11,7 @@ import {
 } from "@heroicons/react/24/solid";
 
 import { Home, Profile, Ubicacion, Configuracion, Historial, Guardados } from "@/pages/dashboard";
-import { SignIn, SignUp } from "@/pages/auth";
-import { RecoverPassword } from "@/pages/auth/contraseña";
+import { SignIn, SignUp, RecoverPassword, ResetPassword } from "@/pages/auth";
 
 const iconProps = { className: "w-5 h-5 text-inherit" };
 
@@ -79,6 +78,12 @@ export const routes = [
         name: "Recuperar Contraseña",
         path: "/contraseña",
         element: <RecoverPassword />,
+      },
+      {
+        icon: <RectangleStackIcon {...iconProps} />,
+        name: "Restablecer contraseña",
+        path: "/ResetearContra",
+        element: <ResetPassword />,
       },
     ],
   },
