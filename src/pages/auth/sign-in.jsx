@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useMaterialTailwindController } from "@/context";
 
-// Colecciones de imágenes por tema y modo
 const imageSets = {
   light: [
     "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
@@ -26,17 +25,14 @@ export function SignIn() {
   const [controller] = useMaterialTailwindController();
   const { darkMode } = controller;
 
-  // Imagen inicial que aparece instantáneamente
   const selectedImages = darkMode ? imageSets.dark : imageSets.light;
   const [image] = useState(() => {
     const randomIndex = Math.floor(Math.random() * selectedImages.length);
     return selectedImages[randomIndex];
   });
 
-  // Estado para mostrar/ocultar contraseña
   const [showPassword, setShowPassword] = useState(false);
 
-  // Control del modo oscuro
   useEffect(() => {
     const root = document.documentElement;
     if (darkMode) root.classList.add("dark");
@@ -55,12 +51,12 @@ export function SignIn() {
           darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-800"
         }`}
       >
-        {/* Imagen lado izquierdo */}
-        <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
+        {/* Imagen lado izquierdo (siempre visible) */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center mb-6 lg:mb-0">
           <img
             src={image}
             alt="Login"
-            className={`rounded-2xl object-cover w-full h-full transition-all duration-500 ${
+            className={`rounded-2xl object-cover w-full h-64 lg:h-full transition-all duration-500 ${
               darkMode ? "filter brightness-75" : ""
             }`}
           />
@@ -94,7 +90,6 @@ export function SignIn() {
           <form className="flex flex-col gap-6">
             <Input size="lg" label="Correo Electrónico" type="email" />
 
-            {/* Campo de contraseña con ojito */}
             <div className="relative">
               <Input
                 size="lg"
@@ -129,7 +124,6 @@ export function SignIn() {
             </Button>
           </form>
 
-          {/* Botón Google */}
           <div className="mt-6">
             <Button
               size="lg"
@@ -177,3 +171,4 @@ export function SignIn() {
 }
 
 export default SignIn;
+

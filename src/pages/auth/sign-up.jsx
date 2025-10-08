@@ -25,7 +25,11 @@ export function SignUp() {
   ];
 
   // Estado para imagen actual
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(() => {
+    const images = darkMode ? darkImages : lightImages;
+    return images[Math.floor(Math.random() * images.length)];
+  });
+
 
   // Cada vez que entra al componente o cambia el modo, selecciona aleatoriamente una imagen
   useEffect(() => {
@@ -100,24 +104,21 @@ export function SignUp() {
 
   return (
     <section
-      className={`flex items-center justify-center min-h-screen transition-colors duration-300 ${
-        darkMode ? "bg-gray-900" : "bg-blue-100"
-      }`}
+      className={`flex items-center justify-center min-h-screen transition-colors duration-300 ${darkMode ? "bg-gray-900" : "bg-blue-100"
+        }`}
     >
       <Card
         shadow={true}
-        className={`flex flex-col lg:flex-row w-full max-w-5xl p-6 rounded-2xl transition-colors duration-300 ${
-          darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-800"
-        }`}
+        className={`flex flex-col lg:flex-row w-full max-w-5xl p-6 rounded-2xl transition-colors duration-300 ${darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-800"
+          }`}
       >
         {/* Imagen aleatoria */}
         <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
           <img
             src={image}
             alt="Registro"
-            className={`rounded-2xl object-cover w-full h-full transition-all duration-700 ${
-              darkMode ? "filter brightness-75" : ""
-            }`}
+            className={`rounded-2xl object-cover w-full h-full transition-all duration-700 ${darkMode ? "filter brightness-75" : ""
+              }`}
           />
         </div>
 
