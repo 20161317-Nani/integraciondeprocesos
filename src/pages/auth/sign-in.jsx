@@ -22,9 +22,45 @@ const imageSets = {
 };
 
 export function SignIn() {
+
   const [controller] = useMaterialTailwindController();
   const { darkMode } = controller;
   const [image, setImage] = useState("");
+
+ // --- INICIO: LÓGICA DEL FORMULARIO DE LOGIN ---
+  const [formData, setFormData] = useState({
+    correo: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al iniciar sesión');
+      }
+
+      // Si el login es exitoso, guardamos el token y redirigimos
+      localStorage.setItem('token', data.token);
+      alert('¡Inicio de sesión exitoso!');
+      window.location.href = '/dashboard/home'; // Redirige al dashboard
+
+    } catch (error) {
+      alert(error.message); // Muestra "Credenciales no válidas" si falla
+    }
+  };
+  // --- FIN: LÓGICA DEL FORMULARIO ---
 
   // 🌙 Cambia la imagen aleatoriamente al montar el componente
   useEffect(() => {
@@ -87,22 +123,30 @@ export function SignIn() {
               </Link>
             </Typography>
           </div>
-
-          <form className="flex flex-col gap-6">
-            <Input size="lg" label="Correo Electrónico" type="email" />
-            <Input size="lg" label="Contraseña" type="password" />
+        {/* --- CONEXIÓN DEL FORMULARIO Y LOS INPUTS --- */}
+          <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+           <Input 
+              size="lg" 
+              label="Correo Electrónico" 
+              type="email" 
+              name="correo"
+              value={formData.correo}
+              onChange={handleChange}
+            />
+            <Input 
+              size="lg" 
+              label="Contraseña" 
+              type="password" 
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
 
             <Typography color="blue-600" className="text-sm text-right">
               ¿Olvidaste tu contraseña?
-              <Link
-                to="/auth/contraseña"
-                className="text-blue-600 ml-1 font-medium hover:underline cursor-pointer"
-              >
-                Recupérala
-              </Link>
+              <Link to="/auth/contraseña" className="text-blue-600 ml-1 font-medium hover:underline cursor-pointer">Recupérala</Link>
             </Typography>
-
-            <Button className="mt-4" fullWidth>
+            <Button type="submit" className="mt-4" fullWidth>
               Iniciar sesión
             </Button>
           </form>
