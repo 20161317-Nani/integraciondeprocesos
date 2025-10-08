@@ -82,7 +82,7 @@ export const routes = [
       {
         icon: <RectangleStackIcon {...iconProps} />,
         name: "Restablecer contraseña",
-        path: "/ResetearContra",
+        path: "/ResetearContra/:resetToken",
         element: <ResetPassword />,
       },
     ],
