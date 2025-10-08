@@ -1,23 +1,24 @@
 import { useEffect, useState } from "react";
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useMaterialTailwindController } from "@/context";
 
 // Colecciones de imágenes por tema y modo
 const imageSets = {
   light: [
-    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80", // laptop moderna
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80", // playa
-    "https://images.unsplash.com/photo-1522199710521-72d69614c702?auto=format&fit=crop&w=1200&q=80", // oficina
-    "https://images.unsplash.com/photo-1486308510493-aa64833634ef?auto=format&fit=crop&w=1200&q=80", // ciudad
-    "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1200&q=80", // naturaleza
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1522199710521-72d69614c702?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1486308510493-aa64833634ef?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1200&q=80",
   ],
   dark: [
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80", // código nocturno
-    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=1200&q=80", // ciudad de noche
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80", // auroras
-    "https://images.unsplash.com/photo-1533025784049-38f3f9f2b2f8?auto=format&fit=crop&w=1200&q=80", // paisaje montañoso
-    "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1200&q=80", // bosque oscuro
+    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1533025784049-38f3f9f2b2f8?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1200&q=80",
   ],
 };
 
@@ -25,19 +26,39 @@ export function SignIn() {
   const [controller] = useMaterialTailwindController();
   const { darkMode } = controller;
 
-  // Inicializa la imagen aleatoria directamente para evitar carga vacía
+  // Imagen inicial (no cambia al recargar)
   const selectedImages = darkMode ? imageSets.dark : imageSets.light;
   const [image] = useState(() => {
     const randomIndex = Math.floor(Math.random() * selectedImages.length);
     return selectedImages[randomIndex];
   });
 
-  // Aplica la clase 'dark' al <html>
+  // Estado de visibilidad y validación de contraseña
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [validation, setValidation] = useState({
+    length: false,
+    upper: false,
+    number: false,
+    symbol: false,
+  });
+
+  // Cambiar modo dark en HTML
   useEffect(() => {
     const root = document.documentElement;
     if (darkMode) root.classList.add("dark");
     else root.classList.remove("dark");
   }, [darkMode]);
+
+  // Validaciones de contraseña
+  useEffect(() => {
+    setValidation({
+      length: password.length >= 8,
+      upper: /[A-Z]/.test(password),
+      number: /[0-9]/.test(password),
+      symbol: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    });
+  }, [password]);
 
   return (
     <section
@@ -74,7 +95,6 @@ export function SignIn() {
             >
               Te extrañamos
             </Typography>
-
             <br />
             <Typography color="blue-600" className="text-sm text-right">
               ¿No estás registrado?
@@ -89,7 +109,60 @@ export function SignIn() {
 
           <form className="flex flex-col gap-6">
             <Input size="lg" label="Correo Electrónico" type="email" />
-            <Input size="lg" label="Contraseña" type="password" />
+
+            {/* Campo de contraseña con ojito */}
+            <div className="relative">
+              <Input
+                size="lg"
+                label="Contraseña"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-gray-500"
+              >
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+
+            {/* Validaciones visuales */}
+            <div className="text-sm space-y-1">
+              <p
+                className={`${
+                  validation.length ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                • Mínimo 8 caracteres
+              </p>
+              <p
+                className={`${
+                  validation.upper ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                • Al menos una mayúscula
+              </p>
+              <p
+                className={`${
+                  validation.number ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                • Al menos un número
+              </p>
+              <p
+                className={`${
+                  validation.symbol ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                • Al menos un símbolo
+              </p>
+            </div>
 
             <Typography color="blue-600" className="text-sm text-right">
               ¿Olvidaste tu contraseña?
