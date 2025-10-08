@@ -9,19 +9,19 @@ export function SignUp() {
 
   // Conjuntos de imágenes de Unsplash
   const lightImages = [
-    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80", // equipo trabajando
-    "https://images.unsplash.com/photo-1508780709619-79562169bc64?auto=format&fit=crop&w=1200&q=80", // paisaje natural
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80", // retrato persona feliz
-    "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80", // coworking oficina
-    "https://images.unsplash.com/photo-1520975918318-3bb2c3c1f259?auto=format&fit=crop&w=1200&q=80", // ciudad moderna
+    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1508780709619-79562169bc64?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1520975918318-3bb2c3c1f259?auto=format&fit=crop&w=1200&q=80",
   ];
 
   const darkImages = [
-    "https://images.unsplash.com/photo-1517816428104-797678c7cf8b?auto=format&fit=crop&w=1200&q=80", // ciudad de noche
-    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80", // paisaje montañoso oscuro
-    "https://images.unsplash.com/photo-1505685296765-3a2736de412f?auto=format&fit=crop&w=1200&q=80", // animales nocturnos
-    "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80", // tecnología en modo oscuro
-    "https://images.unsplash.com/photo-1505245208761-ba872912fac0?auto=format&fit=crop&w=1200&q=80", // cielo estrellado
+    "https://images.unsplash.com/photo-1517816428104-797678c7cf8b?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1505685296765-3a2736de412f?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1505245208761-ba872912fac0?auto=format&fit=crop&w=1200&q=80",
   ];
 
   // Estado para imagen actual
@@ -42,8 +42,34 @@ export function SignUp() {
     password: "",
   });
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Estados y validaciones de contraseña
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordValidations, setPasswordValidations] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    symbol: false,
+    noRepeatNumbers: false,
+  });
+
+  const validatePassword = (password) => {
+    setPasswordValidations({
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      symbol: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      noRepeatNumbers: !/(?:([0-9]).*?\1)/.test(password),
+    });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (name === "password") validatePassword(value);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -132,14 +158,98 @@ export function SignUp() {
               value={formData.correo}
               onChange={handleChange}
             />
-            <Input
-              size="lg"
-              label="Contraseña"
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-            />
+
+            {/* Campo de contraseña con ojito y validaciones */}
+            <div className="relative">
+              <Input
+                size="lg"
+                label="Contraseña"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+              />
+              {/* Botón del ojito */}
+              <button
+                type="button"
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M4.03 3.97a.75.75 0 011.06 0l10.94 10.94a.75.75 0 11-1.06 1.06l-1.518-1.518A8.457 8.457 0 0110 15.5c-3.637 0-6.716-2.293-8.341-5.5a9.964 9.964 0 012.882-3.49L4.03 5.03a.75.75 0 010-1.06zm8.432 9.492l-1.59-1.59a3 3 0 01-3.28-3.28l-1.59-1.59A7.965 7.965 0 002 10c1.407 2.805 4.486 5 8 5a7.967 7.967 0 002.462-.538zM10 5a4.978 4.978 0 012.086.453L10.43 7.11a3 3 0 00-3.32 3.32L5.453 10.086A4.978 4.978 0 0110 5z" />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10 3c-3.637 0-6.716 2.293-8.341 5.5a9.964 9.964 0 008.341 5.5c3.637 0 6.716-2.293 8.341-5.5A9.964 9.964 0 0010 3zm0 9a3.5 3.5 0 110-7 3.5 3.5 0 010 7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            {/* Validaciones dinámicas */}
+            {formData.password && (
+              <ul className="text-sm mt-2 space-y-1">
+                <li
+                  className={
+                    passwordValidations.length ? "text-green-600" : "text-red-600"
+                  }
+                >
+                  Mínimo 8 caracteres
+                </li>
+                <li
+                  className={
+                    passwordValidations.uppercase
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
+                  Al menos una mayúscula
+                </li>
+                <li
+                  className={
+                    passwordValidations.lowercase
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
+                  Al menos una minúscula
+                </li>
+                <li
+                  className={
+                    passwordValidations.number ? "text-green-600" : "text-red-600"
+                  }
+                >
+                  Al menos un número
+                </li>
+                <li
+                  className={
+                    passwordValidations.symbol ? "text-green-600" : "text-red-600"
+                  }
+                >
+                  Al menos un símbolo
+                </li>
+                <li
+                  className={
+                    passwordValidations.noRepeatNumbers
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
+                  No repetir números consecutivos
+                </li>
+              </ul>
+            )}
 
             <Button type="submit" className="mt-4" fullWidth>
               Registrarse
