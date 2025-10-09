@@ -30,7 +30,6 @@ export function SignUp() {
     return images[Math.floor(Math.random() * images.length)];
   });
 
-
   // Cada vez que entra al componente o cambia el modo, selecciona aleatoriamente una imagen
   useEffect(() => {
     const images = darkMode ? darkImages : lightImages;
@@ -57,6 +56,7 @@ export function SignUp() {
     noRepeatNumbers: false,
   });
 
+  // ✅ Validación de contraseña
   const validatePassword = (password) => {
     setPasswordValidations({
       length: password.length >= 8,
@@ -68,6 +68,11 @@ export function SignUp() {
     });
   };
 
+  // ✅ Validación de correo (debe contener @)
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -77,6 +82,13 @@ export function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // 🚨 Validar correo antes de enviar
+    if (!validateEmail(formData.correo)) {
+      alert("Por favor ingresa un correo electrónico válido que contenga '@'.");
+      return;
+    }
+
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -93,6 +105,7 @@ export function SignUp() {
       alert(error.message);
     }
   };
+
   // --- Fin lógica formulario ---
 
   // Aplica modo oscuro global
@@ -104,21 +117,24 @@ export function SignUp() {
 
   return (
     <section
-      className={`flex items-center justify-center min-h-screen transition-colors duration-300 ${darkMode ? "bg-gray-900" : "bg-blue-100"
-        }`}
+      className={`flex items-center justify-center min-h-screen transition-colors duration-300 ${
+        darkMode ? "bg-gray-900" : "bg-blue-100"
+      }`}
     >
       <Card
         shadow={true}
-        className={`flex flex-col lg:flex-row w-full max-w-5xl p-6 rounded-2xl transition-colors duration-300 ${darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-800"
-          }`}
+        className={`flex flex-col lg:flex-row w-full max-w-5xl p-6 rounded-2xl transition-colors duration-300 ${
+          darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-800"
+        }`}
       >
         {/* Imagen aleatoria */}
         <div className="w-full lg:w-1/2 hidden lg:flex items-center justify-center">
           <img
             src={image}
             alt="Registro"
-            className={`rounded-2xl object-cover w-full h-full transition-all duration-700 ${darkMode ? "filter brightness-75" : ""
-              }`}
+            className={`rounded-2xl object-cover w-full h-full transition-all duration-700 ${
+              darkMode ? "filter brightness-75" : ""
+            }`}
           />
         </div>
 
@@ -158,6 +174,7 @@ export function SignUp() {
               name="correo"
               value={formData.correo}
               onChange={handleChange}
+              error={formData.correo && !formData.correo.includes("@")}
             />
 
             {/* Campo de contraseña con ojito y validaciones */}
