@@ -33,6 +33,40 @@ export function SignIn() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  // --- INICIO: LÓGICA DEL FORMULARIO 
+  const [formData, setFormData] = useState({
+    correo: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Evita que la página se recargue
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al iniciar sesión');
+      }
+
+      localStorage.setItem('token', data.token);
+      alert('¡Inicio de sesión exitoso!');
+      window.location.href = '/dashboard/home';
+
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  // --- FIN: LÓGICA DEL FORMULARIO ---
+
   useEffect(() => {
     const root = document.documentElement;
     if (darkMode) root.classList.add("dark");
@@ -87,14 +121,26 @@ export function SignIn() {
             </Typography>
           </div>
 
-          <form className="flex flex-col gap-6">
-            <Input size="lg" label="Correo Electrónico" type="email" />
+          <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+             <Input 
+              size="lg" 
+              label="Correo Electrónico" 
+              type="email" 
+              name="correo"
+              value={formData.correo}
+              onChange={handleChange}
+              required
+            />
 
             <div className="relative">
               <Input
                 size="lg"
                 label="Contraseña"
                 type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
               />
               <button
                 type="button"
@@ -119,7 +165,7 @@ export function SignIn() {
               </Link>
             </Typography>
 
-            <Button className="mt-4" fullWidth>
+            <Button type="submit" className="mt-4" fullWidth>
               Iniciar sesión
             </Button>
           </form>
