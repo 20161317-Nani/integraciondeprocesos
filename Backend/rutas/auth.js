@@ -170,4 +170,20 @@ router.put('/ResetearContra/:resetToken', async (req, res) => {
 });
 
 
+// --- Ruta para obtener los datos del usuario logueado ---
+// @ruta    GET /api/auth/me
+// @desc    Obtener los datos del usuario logueado
+// @acceso  Privado
+router.get('/me', auth, async (req, res) => { // <-- 2. APLICA EL MIDDLEWARE 'auth'
+  try {
+    // El middleware 'auth' ya verificó el token y nos dio el 'req.user'
+    const user = await User.findById(req.user.id).select('-password'); // Busca al usuario por ID y excluye la contraseña
+    res.json(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
+
 module.exports = router;
