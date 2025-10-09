@@ -21,8 +21,60 @@ import {
 import { Link } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import { platformSettingsData, conversationsData, projectsData } from "@/data";
-
+import { useEffect, useState } from 'react';
 export function Profile() {
+
+  const [userProfile, setUserProfile] = useState(null);
+
+  useEffect(() => {
+    // Función para obtener los datos del perfil
+    const fetchProfile = async () => {
+      const token = localStorage.getItem('token'); // Obtiene el token guardado
+      if (!token) {
+        // Si no hay token, no debería estar en esta página. Redirige al login.
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/me', {
+          method: 'GET',
+          headers: {
+            'x-auth-token': token, // Envía el token en el header
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al obtener los datos del perfil');
+        }
+
+        const data = await response.json();
+        setUserProfile(data); // Guarda los datos en el estado
+      } catch (error) {
+        console.error(error);
+        // Opcional: manejar el error, quizás borrando un token inválido
+        localStorage.removeItem('token');
+        window.location.href = '/auth/sign-in';
+      }
+    };
+
+    fetchProfile();
+  }, []); // El array vacío asegura que se ejecute solo una vez al cargar el componente
+
+  // Muestra un mensaje de carga mientras se obtienen los datos
+  if (!userProfile) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Typography>Cargando perfil...</Typography>
+      </div>
+    );
+  }
+  // Función para cerrar sesión
+  const handleLogout = () => {
+  localStorage.removeItem('token');
+  window.location.href = '/auth/sign-in';
+};
+
   return (
     <>
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover bg-center">
@@ -39,44 +91,29 @@ export function Profile() {
                 variant="rounded"
                 className="rounded-lg shadow-lg shadow-blue-gray-500/40"
               />
+               {/* --- DATOS DINÁMICOS --- */}
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
-                  Richard Davis
+                  {userProfile.nombre} {userProfile.apellido}
                 </Typography>
-                <Typography
-                  variant="small"
-                  className="font-normal text-blue-gray-600"
-                >
-                  CEO / Co-Founder
+                <Typography variant="small" className="font-normal text-blue-gray-600">
+                  {userProfile.correo}
                 </Typography>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-8 px-4 lg:grid-cols-2">
-            {/* Información Básica del Usuario */}
             <div className="space-y-6">
-              <Typography variant="h6" color="blue-gray" className="mb-4">
-                Información Personal
-              </Typography>
-              
+              <Typography variant="h6">Información Personal</Typography>
               <div className="space-y-4">
                 <div>
-                  <Typography variant="small" className="font-semibold text-blue-gray-500">
-                    Nombre Completo
-                  </Typography>
-                  <Typography variant="paragraph" className="text-blue-gray-800">
-                    Richard Davis
-                  </Typography>
+                  <Typography variant="small" className="font-semibold text-blue-gray-500">Nombre Completo</Typography>
+                  <Typography variant="paragraph" className="text-blue-gray-800">{userProfile.nombre} {userProfile.apellido}</Typography>
                 </div>
-
                 <div>
-                  <Typography variant="small" className="font-semibold text-blue-gray-500">
-                    Correo Electrónico
-                  </Typography>
-                  <Typography variant="paragraph" className="text-blue-gray-800">
-                    richard.davis@mail.com
-                  </Typography>
+                  <Typography variant="small" className="font-semibold text-blue-gray-500">Correo Electrónico</Typography>
+                  <Typography variant="paragraph" className="text-blue-gray-800">{userProfile.correo}</Typography>
                 </div>
 
                 <div>
@@ -152,6 +189,9 @@ export function Profile() {
                 <Typography variant="small" className="text-green-600">
                   Verificada
                 </Typography>
+                <Button color="red" onClick={handleLogout}>
+                  Cerrar Sesión
+                </Button>
               </div>
             </div>
           </div>

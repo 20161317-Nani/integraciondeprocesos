@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/usuarios'); // Importa el modelo
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const auth = require('../middleware/auth'); // Middleware para rutas protegidas
 
 // @ruta    POST /api/auth/register
 // @desc    Registrar un nuevo usuario
