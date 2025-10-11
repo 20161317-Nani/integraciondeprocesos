@@ -25,7 +25,7 @@ export function Historial() {
   );
 
   return (
-     <ProtectedContent message="Para configurar tu perfil personal, debes iniciar sesión.">
+     <ProtectedContent message="Para acceder a tu historial personal, debes iniciar sesión.">
       {/* Todo lo que está aquí adentro solo se mostrará si el usuario ha iniciado sesión 
         // Una vez que los datos llegan, muestra el perfil*/}
     <div className="mt-12 flex flex-col gap-4">

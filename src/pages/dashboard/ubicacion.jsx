@@ -32,7 +32,7 @@ export function Ubicacion() {
   return (
 
      // Todo se envuelve en protectedcontent para saber si el usuaio esta logeado o no
-    <ProtectedContent message="Para configurar tu perfil personal, debes iniciar sesión.">
+    <ProtectedContent message="Para configurar tu ubicación personal y mejorar tu experiencia, debes iniciar sesión.">
       {/* Todo lo que está aquí adentro solo se mostrará si el usuario ha iniciado sesión 
         // Una vez que los datos llegan, muestra el perfil*/}
     <div className="mt-12 flex flex-col md:flex-row gap-4">

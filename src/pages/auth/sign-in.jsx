@@ -3,6 +3,7 @@ import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useMaterialTailwindController } from "@/context";
+import { useNavigate } from "react-router-dom";
 
 const imageSets = {
   light: [
@@ -66,6 +67,16 @@ export function SignIn() {
     }
   };
   // --- FIN: LÓGICA DEL FORMULARIO ---
+
+  const navigate = useNavigate();
+
+  const handleGuestLogin = () => {
+    // Nos aseguramos de que no haya un token de una sesión anterior
+    localStorage.removeItem('token');
+    // Navega a la página principal del dashboard
+    navigate('/dashboard/home');
+  };
+
 
   useEffect(() => {
     const root = document.documentElement;
@@ -210,11 +221,15 @@ export function SignIn() {
               <span>Iniciar sesión con Google</span>
             </Button>
 
-            <Button type="submit" className="mt-4" fullWidth color="blue-gray">
+            <Button
+              type="button" // MUY IMPORTANTE: para no enviar el formulario de login
+              className="mt-4"
+              fullWidth
+              color="blue-gray"
+              onClick={handleGuestLogin}
+            >
               Iniciar sesión como invitado
-            </Button>
-
-            
+            </Button>   
           </div>
         </div>
       </Card>

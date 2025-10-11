@@ -25,6 +25,8 @@ export function Sidenav({ brandImg, brandName, routes }) {
     window.location.href = '/auth/sign-in';
   };
 
+  // Verifica si el usuario está logeado
+  const token = localStorage.getItem('token');
 
 
   return (
@@ -102,22 +104,22 @@ export function Sidenav({ brandImg, brandName, routes }) {
         <ul className="mb-4 flex flex-col gap-1">
   </ul>
       </div>
- <div className="absolute bottom-4 w-full px-4">
-        <Button
-          variant="text"
-          color={sidenavType === "red" ? "red" : "red"}
-          className="flex items-center gap-4 px-4 capitalize"
-          fullWidth
-          onClick={handleLogout}
-        >
-          <ArrowLeftOnRectangleIcon strokeWidth={2.5} className="h-5 w-5 text-inherit" />
-          <Typography color="inherit" className="font-medium capitalize">
-            Cerrar Sesión
-          </Typography>
-        </Button>
-      </div>
-
-
+  {token && (
+        <div className="absolute bottom-4 w-full px-4">
+          <Button
+            variant="text"
+            color={sidenavType === "dark" ? "white" : "blue-gray"}
+            className="flex items-center gap-4 px-4 capitalize"
+            fullWidth
+            onClick={handleLogout}
+          >
+            <ArrowLeftOnRectangleIcon strokeWidth={2.5} className="h-5 w-5 text-inherit" />
+            <Typography color="inherit" className="font-medium capitalize">
+              Cerrar Sesión
+            </Typography>
+          </Button>
+        </div>
+      )}
     </aside>
   );
 }
