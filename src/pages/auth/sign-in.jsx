@@ -209,6 +209,12 @@ export function SignIn() {
               </svg>
               <span>Iniciar sesión con Google</span>
             </Button>
+
+            <Button type="submit" className="mt-4" fullWidth color="blue-gray">
+              Iniciar sesión como invitado
+            </Button>
+
+            
           </div>
         </div>
       </Card>

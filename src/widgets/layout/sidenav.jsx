@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
+import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline";
 
 export function Sidenav({ brandImg, brandName, routes }) {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -17,6 +18,14 @@ export function Sidenav({ brandImg, brandName, routes }) {
     white: "bg-white shadow-sm",
     transparent: "bg-transparent",
   };
+
+  // Función para cerrar sesión
+   const handleLogout = () => {
+    localStorage.removeItem('token');
+    window.location.href = '/auth/sign-in';
+  };
+
+
 
   return (
     <aside
@@ -90,14 +99,32 @@ export function Sidenav({ brandImg, brandName, routes }) {
             ))}
           </ul>
         ))}
+        <ul className="mb-4 flex flex-col gap-1">
+  </ul>
       </div>
+ <div className="absolute bottom-4 w-full px-4">
+        <Button
+          variant="text"
+          color={sidenavType === "red" ? "red" : "red"}
+          className="flex items-center gap-4 px-4 capitalize"
+          fullWidth
+          onClick={handleLogout}
+        >
+          <ArrowLeftOnRectangleIcon strokeWidth={2.5} className="h-5 w-5 text-inherit" />
+          <Typography color="inherit" className="font-medium capitalize">
+            Cerrar Sesión
+          </Typography>
+        </Button>
+      </div>
+
+
     </aside>
   );
 }
 
 Sidenav.defaultProps = {
   brandImg: "/img/logo-ct.png",
-  brandName: "Material Tailwind React",
+  brandName: "4U Player",
 };
 
 Sidenav.propTypes = {

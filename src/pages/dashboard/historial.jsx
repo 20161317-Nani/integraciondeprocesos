@@ -6,6 +6,7 @@ import {
   Input,
 } from "@material-tailwind/react";
 import { ClockIcon } from "@heroicons/react/24/solid";
+import ProtectedContent from '@/components/ProtectedContent'; // Importar el contenido protegido
 
 export function Historial() {
   const [search, setSearch] = useState("");
@@ -24,6 +25,9 @@ export function Historial() {
   );
 
   return (
+     <ProtectedContent message="Para configurar tu perfil personal, debes iniciar sesión.">
+      {/* Todo lo que está aquí adentro solo se mostrará si el usuario ha iniciado sesión 
+        // Una vez que los datos llegan, muestra el perfil*/}
     <div className="mt-12 flex flex-col gap-4">
       {/* Barra de búsqueda */}
       <div className="flex items-center gap-2 mb-4">
@@ -65,6 +69,7 @@ export function Historial() {
         )}
       </div>
     </div>
+        </ProtectedContent>
   );
 }
 

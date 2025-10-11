@@ -7,6 +7,7 @@ import {
   BookmarkIcon,
   Cog6ToothIcon,
   ServerStackIcon,
+  ArrowLeftOnRectangleIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
 
@@ -87,6 +88,9 @@ export const routes = [
       },
     ],
   },
+
+
+
 ];
 
 export default routes;
