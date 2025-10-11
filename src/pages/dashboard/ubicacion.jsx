@@ -26,9 +26,15 @@ import {
   ordersOverviewData,
 } from "@/data";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
+import ProtectedContent from '@/components/ProtectedContent'; // Importa el contenido protegido
 
 export function Ubicacion() {
   return (
+
+     // Todo se envuelve en protectedcontent para saber si el usuaio esta logeado o no
+    <ProtectedContent message="Para configurar tu perfil personal, debes iniciar sesión.">
+      {/* Todo lo que está aquí adentro solo se mostrará si el usuario ha iniciado sesión 
+        // Una vez que los datos llegan, muestra el perfil*/}
     <div className="mt-12 flex flex-col md:flex-row gap-4">
       {/* Contenedor principal de video + sugeridos */}
       <div className="flex-1 flex flex-col gap-4">
@@ -69,6 +75,7 @@ export function Ubicacion() {
         </CardBody>
       </Card>
     </div>
+       </ProtectedContent>
   );
 }
 

@@ -22,53 +22,35 @@ import { Link } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import { platformSettingsData, conversationsData, projectsData } from "@/data";
 import { useEffect, useState } from 'react';
+import ProtectedContent from '@/components/ProtectedContent'; // Importa el contenido protegido
+
 export function Profile() {
 
   const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
-    // Función para obtener los datos del perfil
+    // Esta función solo se llamará si el usuario está autenticado,
+    // porque el componente que la llama está dentro de <ProtectedContent>
     const fetchProfile = async () => {
-      const token = localStorage.getItem('token'); // Obtiene el token guardado
-      if (!token) {
-        // Si no hay token, no debería estar en esta página. Redirige al login.
-        window.location.href = '/auth/sign-in';
-        return;
-      }
+      const token = localStorage.getItem('token');
+      if (!token) return; // Si por alguna razón no hay token, no hacer nada
 
       try {
         const response = await fetch('/api/auth/me', {
-          method: 'GET',
-          headers: {
-            'x-auth-token': token, // Envía el token en el header
-          },
+          headers: { 'x-auth-token': token },
         });
-
-        if (!response.ok) {
-          throw new Error('Error al obtener los datos del perfil');
-        }
-
+        if (!response.ok) throw new Error('Error al obtener datos');
+        
         const data = await response.json();
-        setUserProfile(data); // Guarda los datos en el estado
+        setUserProfile(data);
       } catch (error) {
         console.error(error);
-        // Opcional: manejar el error, quizás borrando un token inválido
-        localStorage.removeItem('token');
-        window.location.href = '/auth/sign-in';
       }
     };
 
     fetchProfile();
-  }, []); // El array vacío asegura que se ejecute solo una vez al cargar el componente
+  }, []);
 
-  // Muestra un mensaje de carga mientras se obtienen los datos
-  if (!userProfile) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Typography>Cargando perfil...</Typography>
-      </div>
-    );
-  }
   // Función para cerrar sesión
   const handleLogout = () => {
   localStorage.removeItem('token');
@@ -76,6 +58,15 @@ export function Profile() {
 };
 
   return (
+      // Todo se envuelve en protectedcontent para saber si el usuaio esta logeado o no
+    <ProtectedContent message="Para configurar tu perfil personal, debes iniciar sesión.">
+      {/* Todo lo que está aquí adentro solo se mostrará si el usuario ha iniciado sesión */}
+      
+      {!userProfile ? (
+        // Muestra un estado de carga mientras se obtienen los datos
+        <Typography>Cargando perfil...</Typography>
+      ) : (
+        // Una vez que los datos llegan, muestra el perfil
     <>
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover bg-center">
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
@@ -198,6 +189,8 @@ export function Profile() {
         </CardBody>
       </Card>
     </>
+      )} </ProtectedContent>
+
   );
 }
 
