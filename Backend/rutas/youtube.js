@@ -38,4 +38,42 @@ router.get('/videos', async (req, res) => {
   }
 });
 
+// @ruta    GET /api/youtube/video/:videoId
+// @desc    Obtener los detalles de un video específico
+// @acceso  Público
+router.get('/video/:videoId', async (req, res) => {
+  try {
+    const { videoId } = req.params;
+    const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/videos';
+    
+    const response = await axios.get(YOUTUBE_API_URL, {
+      params: {
+        part: 'snippet,statistics',
+        id: videoId, // Buscamos por el ID específico que viene en la URL
+        key: process.env.YOUTUBE_API_KEY,
+      },
+    });
+
+    if (response.data.items.length === 0) {
+      return res.status(404).json({ message: 'Video no encontrado' });
+    }
+
+    const item = response.data.items[0];
+    
+    const videoDetails = {
+      id: item.id,
+      title: item.snippet.title,
+      channelName: item.snippet.channelTitle,
+      views: `${Math.round(item.statistics.viewCount / 1000)}k`,
+      publishedAt: new Date(item.snippet.publishedAt).toLocaleDateString('es-MX'),
+    };
+    
+    res.json(videoDetails);
+
+  } catch (error) {
+    console.error('Error al obtener detalles del video:', error.message);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
 module.exports = router;

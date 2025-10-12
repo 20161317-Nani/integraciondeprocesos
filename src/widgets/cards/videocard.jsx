@@ -1,8 +1,10 @@
 import React from "react";
 import { Typography, Avatar } from "@material-tailwind/react";
+import { Link } from "react-router-dom";
 
 export function VideoCard({ video }) {
   return (
+      <Link to={`/dashboard/video/${video.id}`}>
     <div className="flex flex-col gap-2 cursor-pointer">
       {/* Miniatura del video */}
       <img 
@@ -29,6 +31,7 @@ export function VideoCard({ video }) {
         </div>
       </div>
     </div>
+    </Link>
   );
 }
 
