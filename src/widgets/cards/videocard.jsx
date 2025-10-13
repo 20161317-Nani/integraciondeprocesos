@@ -15,8 +15,7 @@ export function VideoCard({ video }) {
       
       <div className="flex gap-3 mt-2">
         {/* Avatar del canal */}
-        <Avatar src={video.channelAvatarUrl} alt={video.channelName} size="sm" />
-        
+        <Avatar src={video.channelAvatarUrl} alt={video.channelName} size="sm" />        
         {/* Información del video */}
         <div className="flex flex-col">
           <Typography variant="h6" color="blue-gray" className="font-semibold text-base leading-snug">

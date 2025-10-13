@@ -72,7 +72,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
               </li>
             )}
             {pages.map(({ icon, name, path }) => (
-              <li key={name}>
+              <li key={path}>
                 <NavLink to={`/${layout}${path}`}>
                   {({ isActive }) => (
                     <Button

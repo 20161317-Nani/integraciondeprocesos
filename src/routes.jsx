@@ -11,7 +11,7 @@ import {
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
 
-import { Home, Profile, Ubicacion, Configuracion, Historial, Guardados,Video } from "@/pages/dashboard";
+import { Home, Profile, Ubicacion, Configuracion, Historial, Guardados,Video, ResultadosBusqueda } from "@/pages/dashboard";
 import { SignIn, SignUp, RecoverPassword, ResetPassword } from "@/pages/auth";
 
 const iconProps = { className: "w-5 h-5 text-inherit" };
@@ -59,6 +59,10 @@ export const routes = [
        {
         path: "/video/:videoId", // La ruta dinámica con el ID del video
         element: <Video />,
+      },
+      {
+        path: "/search", // La ruta para los resultados
+        element: <ResultadosBusqueda />,
       },
     ],
   },

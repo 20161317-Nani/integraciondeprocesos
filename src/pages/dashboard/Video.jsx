@@ -91,7 +91,7 @@ export function Video() {
         <div className="p-2">
           <Typography variant="h4" color="blue-gray">{videoDetails.title}</Typography>
           <div className="flex items-center gap-4 mt-4">
-            <Avatar src={videoDetails.channelAvatarUrl || ''} alt={videoDetails.channelName} />
+            <Avatar src={videoDetails.channelAvatarUrl} alt={videoDetails.channelName} />
             <div>
               <Typography variant="h6">{videoDetails.channelName}</Typography>
               <Typography variant="small" color="gray">

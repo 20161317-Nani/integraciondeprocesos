@@ -1,4 +1,5 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate  } from "react-router-dom";
+import { useState } from "react"; 
 import {
   Navbar,
   Typography,
@@ -11,6 +12,7 @@ import {
   MenuList,
   MenuItem,
   Avatar,
+  
 } from "@material-tailwind/react";
 import {
   UserCircleIcon,
@@ -19,6 +21,7 @@ import {
   ClockIcon,
   CreditCardIcon,
   Bars3Icon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
 import {
   useMaterialTailwindController,
@@ -26,11 +29,35 @@ import {
   setOpenSidenav,
 } from "@/context";
 
+
+
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  // Maneja el cambio en el input de la barra de búsqueda 
+  const handleSearch = (event) => {
+    // Si se presiona la tecla Enter y hay algo escrito
+    if (event.key === 'Enter' && searchTerm.trim() !== '') {
+      navigate(`/dashboard/search?q=${searchTerm}`);
+    }
+  };
+  // Función para ejecutar la búsqueda al hacer clic en el ícono
+   const executeSearch = () => {
+    if (searchTerm.trim() !== '') {
+      navigate(`/dashboard/search?q=${searchTerm}`);
+    }
+  };
+
+  const handleSearchKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      executeSearch(); // Llama a la función central
+    }
+  };
 
   return (
     <Navbar
@@ -72,8 +99,21 @@ export function DashboardNavbar() {
           </Typography>
         </div>
         <div className="flex items-center">
-          <div className="mr-auto md:mr-4 md:w-56">
-            <Input label="Search" />
+          <div className="relative mr-auto md:mr-4 md:w-64">
+           <Input  // Barra de búsqueda *input*
+              label="Buscar" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              className="pr-10" // Añade padding para que el texto no quede debajo del ícono
+            />
+            <IconButton
+              size="sm"
+              className="!absolute right-1 top-1/2 -translate-y-1/2 rounded"
+              onClick={executeSearch} // Llama a la misma función al hacer clic
+            >
+              <MagnifyingGlassIcon className="h-5 w-5" />
+            </IconButton>
           </div>
           <IconButton
             variant="text"
