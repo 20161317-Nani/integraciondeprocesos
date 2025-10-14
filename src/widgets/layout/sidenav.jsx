@@ -71,7 +71,9 @@ export function Sidenav({ brandImg, brandName, routes }) {
                 </Typography>
               </li>
             )}
-            {pages.map(({ icon, name, path }) => (
+            {pages.map(({ icon, name, path, isPrivate }) => (
+            // Condición: Muestra el enlace si (NO es privado) O (el usuario tiene un token)
+            (!isPrivate || token) && (
               <li key={path}>
                 <NavLink to={`/${layout}${path}`}>
                   {({ isActive }) => (
@@ -97,7 +99,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
                     </Button>
                   )}
                 </NavLink>
-              </li>
+              </li>)
             ))}
           </ul>
         ))}

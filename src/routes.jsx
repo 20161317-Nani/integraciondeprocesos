@@ -31,30 +31,28 @@ export const routes = [
         name: "Ubicacion",
         path: "/ubicacion",
         element: <Ubicacion />,
+        isPrivate: true,
       },
       {
         icon: <ClockIcon {...iconProps} />,
         name: "Historial",
         path: "/historial",
         element: <Historial />,
+        isPrivate: true,
       },
       {
         icon: <BookmarkIcon {...iconProps} />,
         name: "Guardados",
         path: "/guardados",
         element: <Guardados />,
-      },
-      {
-        icon: <Cog6ToothIcon {...iconProps} />,
-        name: "Configuracion",
-        path: "/configuracion",
-        element: <Configuracion />,
+        isPrivate: true,
       },
       {
         icon: <UserCircleIcon {...iconProps} />,
         name: "Perfil",
         path: "/profile",
         element: <Profile />,
+        isPrivate: true,
       },
        {
         path: "/video/:videoId", // La ruta dinámica con el ID del video
@@ -66,39 +64,7 @@ export const routes = [
       },
     ],
   },
-  {
-    title: "Registro",
-    layout: "auth",
-    pages: [
-      {
-        icon: <ServerStackIcon {...iconProps} />,
-        name: "Sign In",
-        path: "/sign-in",
-        element: <SignIn />,
-      },
-      {
-        icon: <RectangleStackIcon {...iconProps} />,
-        name: "Sign Up",
-        path: "/sign-up",
-        element: <SignUp />,
-      },
-      {
-        icon: <RectangleStackIcon {...iconProps} />,
-        name: "Recuperar Contraseña",
-        path: "/contraseña",
-        element: <RecoverPassword />,
-      },
-      {
-        icon: <RectangleStackIcon {...iconProps} />,
-        name: "Restablecer contraseña",
-        path: "/ResetearContra/:resetToken",
-        element: <ResetPassword />,
-      },
-    ],
-  },
-
-
-
+  
 ];
 
 export default routes;
