@@ -38,7 +38,8 @@ export function DashboardNavbar() {
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  
+  const token = localStorage.getItem('token');
+
   // Maneja el cambio en el input de la barra de búsqueda 
   const handleSearch = (event) => {
     // Si se presiona la tecla Enter y hay algo escrito
@@ -123,23 +124,25 @@ export function DashboardNavbar() {
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
-          <Link to="/auth/sign-in">
-            <Button
-              variant="text"
-              color="blue-gray"
-              className="hidden items-center gap-1 px-4 xl:flex normal-case"
-            >
-              <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-              Iniciar Sesion
-            </Button>
-            <IconButton
-              variant="text"
-              color="blue-gray"
-              className="grid xl:hidden"
-            >
-              <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-            </IconButton>
-          </Link>
+           {!token && (
+            <Link to="/auth/sign-in">
+              <Button
+                variant="text"
+                color="blue-gray"
+                className="hidden items-center gap-1 px-4 xl:flex normal-case"
+              >
+                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                Iniciar Sesión
+              </Button>
+              <IconButton
+                variant="text"
+                color="blue-gray"
+                className="grid xl:hidden"
+              >
+                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+              </IconButton>
+            </Link>
+          )}
           <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">

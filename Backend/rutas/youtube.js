@@ -122,4 +122,146 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// RUTA DE BÚSQUEDA POR UBICACIÓN 
+// @ruta    GET /api/youtube/location-search
+// @desc    Buscar videos por coordenadas geográficas
+// @acceso  Público
+router.get('/location-search', async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
+
+    // --- 1. Obtener el código de país desde las coordenadas ---
+    const geoResponse = await axios.get('https://api.opencagedata.com/geocode/v1/json', {
+      params: {
+        q: `${lat}+${lon}`,
+        key: process.env.OPENCAGE_API_KEY,
+      },
+    });
+
+    // Extraemos el código de país (ej. 'JP', 'ZA', 'MX')
+    const regionCode = geoResponse.data.results[0]?.components.country_code.toUpperCase();
+
+    if (!regionCode) {
+      return res.json([]); // Si no se encuentra país, devuelve una lista vacía
+    }
+
+    // --- 2. Buscar los videos más populares para esa región en YouTube ---
+    const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/videos';
+    const youtubeResponse = await axios.get(YOUTUBE_API_URL, {
+      params: {
+        part: 'snippet,statistics',
+        chart: 'mostPopular',
+        regionCode: regionCode, // Usamos el código de país obtenido
+        maxResults: 12,
+        key: process.env.YOUTUBE_API_KEY,
+      },
+    });
+
+    const videos = youtubeResponse.data.items.map(item => ({
+      // ... (misma transformación de siempre)
+      id: item.id,
+      thumbnailUrl: item.snippet.thumbnails.medium.url,
+      title: item.snippet.title,
+      channelName: item.snippet.channelTitle,
+      channelAvatarUrl: `https://picsum.photos/48?random=${item.id}`,
+      views: `${Math.round(item.statistics.viewCount / 1000)}k`,
+      publishedAt: new Date(item.snippet.publishedAt).toLocaleDateString('es-MX'),
+    }));
+
+    res.json(videos);
+
+  } catch (error) {
+    console.error('Error al buscar videos por ubicación:', error.response ? error.response.data : error.message);
+    // Si la API de YouTube falla para una región (ej. no hay 'mostPopular'), devuelve una lista vacía
+    if (error.response && error.response.status === 400) {
+      return res.json([]);
+    }
+    res.status(500).send('Error en el servidor');
+  }
+});
+
+// --- AÑADE ESTA NUEVA RUTA COMBINADA ---
+// @ruta    GET /api/youtube/combined-search
+// @desc    Combina búsqueda local y regional de YouTube
+// @acceso  Público
+router.get('/combined-search', async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
+    const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
+    const YOUTUBE_VIDEOS_URL = 'https://www.googleapis.com/youtube/v3/videos';
+
+    let localVideos = [];
+    let regionalVideos = [];
+
+    // --- 1. Búsqueda Local (Geotagged) ---
+    try {
+      const localResponse = await axios.get(YOUTUBE_SEARCH_URL, {
+        params: {
+          part: 'snippet',
+          location: `${lat},${lon}`,
+          locationRadius: '20km', // Aumentamos un poco el radio
+          type: 'video',
+          maxResults: 8,
+          key: process.env.YOUTUBE_API_KEY,
+        },
+      });
+      localVideos = localResponse.data.items.map(item => ({
+        id: item.id.videoId,
+        thumbnailUrl: item.snippet.thumbnails.medium.url,
+        title: item.snippet.title,
+        channelName: item.snippet.channelTitle,
+        channelAvatarUrl: `https://picsum.photos/48?random=${item.id.videoId}`,
+        publishedAt: new Date(item.snippet.publishedAt).toLocaleDateString('es-MX'),
+        views: 'N/A',
+      }));
+    } catch (e) {
+      console.log("No se encontraron videos locales o hubo un error en la búsqueda local.");
+    }
+
+    // --- 2. Búsqueda Regional (Populares por País) ---
+    const geoResponse = await axios.get('https://api.opencagedata.com/geocode/v1/json', {
+      params: { q: `${lat}+${lon}`, key: process.env.OPENCAGE_API_KEY },
+    });
+    const regionCode = geoResponse.data.results[0]?.components.country_code.toUpperCase();
+
+    if (regionCode) {
+      const regionalResponse = await axios.get(YOUTUBE_VIDEOS_URL, {
+        params: {
+          part: 'snippet,statistics',
+          chart: 'mostPopular',
+          regionCode: regionCode,
+          maxResults: 24, // Pedimos más para tener de dónde rellenar
+          key: process.env.YOUTUBE_API_KEY,
+        },
+      });
+      regionalVideos = regionalResponse.data.items.map(item => ({
+        id: item.id,
+        thumbnailUrl: item.snippet.thumbnails.medium.url,
+        title: item.snippet.title,
+        channelName: item.snippet.channelTitle,
+        channelAvatarUrl: `https://picsum.photos/48?random=${item.id}`,
+        views: `${Math.round(item.statistics.viewCount / 1000)}k`,
+        publishedAt: new Date(item.snippet.publishedAt).toLocaleDateString('es-MX'),
+      }));
+    }
+
+    // --- 3. Combinar y Eliminar Duplicados ---
+    const combinedVideos = [...localVideos, ...regionalVideos];
+    const uniqueVideoIds = new Set();
+    const uniqueVideos = combinedVideos.filter(video => {
+      if (!uniqueVideoIds.has(video.id)) {
+        uniqueVideoIds.add(video.id);
+        return true;
+      }
+      return false;
+    });
+
+    res.json(uniqueVideos.slice(0, 24)); // Enviamos hasta 24 videos únicos
+
+  } catch (error) {
+    console.error('Error en la búsqueda combinada:', error.message);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
 module.exports = router;

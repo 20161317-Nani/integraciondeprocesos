@@ -72,8 +72,6 @@ export function Sidenav({ brandImg, brandName, routes }) {
         </Typography>
       </li>
     )}
-
-            {/* 👇 AQUÍ ESTÁ EL CAMBIO CLAVE 👇 */}
             {pages
               // 1. Primero, filtra solo las páginas que tienen nombre e ícono
               .filter((page) => page.name && page.icon) 

@@ -18,3 +18,4 @@ app.use('/api/youtube', require('./rutas/youtube')); // <-- Ruta de Youtube
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
+app.use('/api/users', require('./rutas/users')); // <-- Ruta de usuarios
