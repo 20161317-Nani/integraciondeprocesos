@@ -57,10 +57,37 @@ export const routes = [
        {
         path: "/video/:videoId", // La ruta dinámica con el ID del video
         element: <Video />,
+        
       },
       {
         path: "/search", // La ruta para los resultados
         element: <ResultadosBusqueda />,
+      },
+      
+    ],
+    
+
+  },
+
+   {
+    
+    layout: "auth",
+    pages: [
+      {
+        path: "/sign-in",
+        element: <SignIn />,
+      },
+      {
+        path: "/sign-up",
+        element: <SignUp />,
+      },
+      {
+        path: "/contraseña",
+        element: <RecoverPassword />,
+      },
+      {
+        path: "/ResetearContra/:resetToken",
+        element: <ResetPassword />,
       },
     ],
   },

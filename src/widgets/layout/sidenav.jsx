@@ -60,57 +60,63 @@ export function Sidenav({ brandImg, brandName, routes }) {
       <div className="m-4">
         {routes.map(({ layout, title, pages }, key) => (
           <ul key={key} className="mb-4 flex flex-col gap-1">
-            {title && (
-              <li className="mx-3.5 mt-4 mb-2">
-                <Typography
-                  variant="small"
-                  color={sidenavType === "dark" ? "white" : "blue-gray"}
-                  className="font-black uppercase opacity-75"
-                >
-                  {title}
-                </Typography>
-              </li>
-            )}
-            {pages.map(({ icon, name, path, isPrivate }) => (
-            // Condición: Muestra el enlace si (NO es privado) O (el usuario tiene un token)
-            (!isPrivate || token) && (
-              <li key={path}>
-                <NavLink to={`/${layout}${path}`}>
-                  {({ isActive }) => (
-                    <Button
-                      variant={isActive ? "gradient" : "text"}
-                      color={
-                        isActive
-                          ? sidenavColor
-                          : sidenavType === "dark"
-                          ? "white"
-                          : "blue-gray"
-                      }
-                      className="flex items-center gap-4 px-4 capitalize"
-                      fullWidth
-                    >
-                      {icon}
-                      <Typography
-                        color="inherit"
-                        className="font-medium capitalize"
-                      >
-                        {name}
-                      </Typography>
-                    </Button>
-                  )}
-                </NavLink>
-              </li>)
+            {title && ( 
+              
+               <li className="mx-3.5 mt-4 mb-2">
+        <Typography
+          variant="small"
+          color={sidenavType === "dark" ? "white" : "blue-gray"}
+          className="font-black uppercase opacity-75"
+        >
+          {title}
+        </Typography>
+      </li>
+    )}
+
+            {/* 👇 AQUÍ ESTÁ EL CAMBIO CLAVE 👇 */}
+            {pages
+              // 1. Primero, filtra solo las páginas que tienen nombre e ícono
+              .filter((page) => page.name && page.icon) 
+              // 2. Luego, mapea sobre esa lista filtrada
+              .map(({ icon, name, path, isPrivate }) => (
+                // 3. Finalmente, aplica la lógica de visibilidad que ya tenías
+                (!isPrivate || token) && (
+                  <li key={path}>
+                    <NavLink to={`/${layout}${path}`}>
+                      {({ isActive }) => (
+                        <Button
+                          variant={isActive ? "gradient" : "text"}
+                          color={
+                            isActive
+                              ? sidenavColor
+                              : sidenavType === "dark"
+                              ? "white"
+                              : "blue-gray"
+                          }
+                          className="flex items-center gap-4 px-4 capitalize"
+                          fullWidth
+                        >
+                          {icon}
+                          <Typography
+                            color="inherit"
+                            className="font-medium capitalize"
+                          >
+                            {name}
+                          </Typography>
+                        </Button>
+                      )}
+                    </NavLink>
+                  </li>
+                )
             ))}
           </ul>
         ))}
-        <ul className="mb-4 flex flex-col gap-1">
-  </ul>
       </div>
   {token && (
         <div className="absolute bottom-4 w-full px-4">
           <Button
             variant="text"
-            color={sidenavType === "dark" ? "white" : "blue-gray"}
+            color={sidenavType === "red" ? "red" : "red"}
             className="flex items-center gap-4 px-4 capitalize"
             fullWidth
             onClick={handleLogout}
