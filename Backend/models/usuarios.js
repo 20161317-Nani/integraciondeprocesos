@@ -19,11 +19,20 @@ const UserSchema = new mongoose.Schema({
     }
   },
 
+  historial: [
+    {
+      videoId: { type: String, required: true },
+      watchedAt: { type: Date, default: Date.now },
+    }
+  ],
+
   // Campos para recuperar la contraseña
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 
 });
+
+
 
 UserSchema.index({ location: '2dsphere' });
 module.exports = mongoose.model('usuario', UserSchema);

@@ -1,75 +1,78 @@
-import React, { useState } from "react";
-import {
-  Typography,
-  Card,
-  CardBody,
-  Input,
-} from "@material-tailwind/react";
-import { ClockIcon } from "@heroicons/react/24/solid";
-import ProtectedContent from '@/components/ProtectedContent'; // Importar el contenido protegido
+import React, { useState, useEffect } from "react";
+import { Typography, Button } from "@material-tailwind/react";
+import { VideoCard } from "@/widgets/cards/VideoCard";
+import ProtectedContent from '@/components/ProtectedContent';
 
 export function Historial() {
-  const [search, setSearch] = useState("");
+  const [history, setHistory] = useState([]);
+  const [videos, setVideos] = useState([]); // Estado para los detalles de los videos
+  const [filter, setFilter] = useState('all'); // Filtro por defecto
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Datos de ejemplo para el historial
-  const historialVideos = [
-    { id: 1, title: "Video Tutorial React", duration: "10:23" },
-    { id: 2, title: "Material Tailwind Tips", duration: "5:12" },
-    { id: 3, title: "Aprende JavaScript", duration: "8:45" },
-    { id: 4, title: "Next.js para principiantes", duration: "12:30" },
-  ];
+  useEffect(() => {
+    const fetchHistory = async () => {
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      if (!token) return;
 
-  // Filtrar videos según búsqueda
-  const filteredVideos = historialVideos.filter((video) =>
-    video.title.toLowerCase().includes(search.toLowerCase())
-  );
+      try {
+        // 1. Obtiene la lista de IDs de video del historial
+        const historyResponse = await fetch(`/api/users/history?period=${filter}`);
+        const historyData = await historyResponse.json();
+        
+        if (historyData.length === 0) {
+            setVideos([]);
+            setIsLoading(false);
+            return;
+        }
+
+        // 2. Convierte la lista de IDs a una cadena para la API de YouTube
+        const videoIds = historyData.map(item => item.videoId).join(',');
+
+        // 3. Pide a tu backend los detalles de todos esos videos en una sola llamada
+        const videosResponse = await fetch(`/api/youtube/video/${videoIds}`);
+        const videosData = await videosResponse.json();
+        setVideos(videosData);
+
+      } catch (error) {
+        console.error("Error al cargar el historial:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [filter]); // Se ejecuta cada vez que el filtro cambia
 
   return (
-     <ProtectedContent message="Para acceder a tu historial personal, debes iniciar sesión.">
-      {/* Todo lo que está aquí adentro solo se mostrará si el usuario ha iniciado sesión 
-        // Una vez que los datos llegan, muestra el perfil*/}
-    <div className="mt-12 flex flex-col gap-4">
-      {/* Barra de búsqueda */}
-      <div className="flex items-center gap-2 mb-4">
-        <ClockIcon className="w-6 h-6 text-blue-500" />
-        <Input
-          type="text"
-          placeholder="Buscar en tu historial..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full"
-        />
-      </div>
+    <div className="mt-12">
+      <ProtectedContent message="Para ver tu historial, debes iniciar sesión.">
+        <Typography variant="h4" className="mb-6">Historial de Reproducción</Typography>
+        
+        {/* Barra de Filtros */}
+        <div className="flex gap-3 mb-8">
+          <Button variant={filter === 'all' ? 'filled' : 'text'} onClick={() => setFilter('all')}>Todo</Button>
+          <Button variant={filter === 'day' ? 'filled' : 'text'} onClick={() => setFilter('day')}>Hoy</Button>
+          <Button variant={filter === 'week' ? 'filled' : 'text'} onClick={() => setFilter('week')}>Semana</Button>
+          <Button variant={filter === 'month' ? 'filled' : 'text'} onClick={() => setFilter('month')}>Mes</Button>
+          <Button variant={filter === 'year' ? 'filled' : 'text'} onClick={() => setFilter('year')}>Año</Button>
+        </div>
 
-      {/* Recuadros de historial */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filteredVideos.length > 0 ? (
-          filteredVideos.map((video) => (
-            <Card
-              key={video.id}
-              className="shadow-lg rounded-lg overflow-hidden hover:scale-105 transition-transform duration-200"
-            >
-              <div className="bg-gray-300 w-full aspect-video flex items-center justify-center text-gray-700 font-semibold">
-                Miniatura
-              </div>
-              <CardBody>
-                <Typography variant="h6" className="font-bold">
-                  {video.title}
-                </Typography>
-                <Typography variant="small" className="text-gray-600">
-                  Duración: {video.duration}
-                </Typography>
-              </CardBody>
-            </Card>
-          ))
+        {isLoading ? (
+          <Typography>Cargando historial...</Typography>
         ) : (
-          <Typography className="col-span-full text-center text-gray-500 mt-4">
-            No se encontraron videos
-          </Typography>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+            {videos.length > 0 ? (
+              videos.map((video) => (
+                <VideoCard key={`${video.id}-${Math.random()}`} video={video} />
+              ))
+            ) : (
+              <Typography>No hay videos en tu historial para este período.</Typography>
+            )}
+          </div>
         )}
-      </div>
+      </ProtectedContent>
     </div>
-        </ProtectedContent>
   );
 }
 

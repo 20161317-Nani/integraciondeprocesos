@@ -58,6 +58,24 @@ export function Video() {
       }
     };
 
+    const logHistory = async () => {
+      const token = localStorage.getItem('token');
+      if (token && videoId) {
+        try {
+          await fetch('/api/users/history', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-auth-token': token,
+            },
+            body: JSON.stringify({ videoId: videoId }),
+          });
+        } catch (error) {
+          console.error("No se pudo guardar el historial:", error);
+        }
+      }
+    };
+
     fetchVideoData();
   }, [videoId]);
 
