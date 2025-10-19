@@ -44,33 +44,29 @@ router.get('/videos', async (req, res) => {
 // @ruta    GET /api/youtube/video/:videoId
 // @desc    Obtener los detalles de un video específico
 // @acceso  Público
-router.get('/video/:videoId', async (req, res) => {
+// RUTA DE DETALLES DE VIDEO
+router.get('/video/:videoIds', async (req, res) => {
   try {
-    const { videoId } = req.params;
+    const { videoIds } = req.params;
     const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/videos';
     
     const response = await axios.get(YOUTUBE_API_URL, {
       params: {
         part: 'snippet,statistics',
-        id: videoId, // Buscamos por el ID específico que viene en la URL
+        id: videoIds, // La API de YouTube acepta IDs separados por coma
         key: process.env.YOUTUBE_API_KEY,
       },
     });
 
-    if (response.data.items.length === 0) {
-      return res.status(404).json({ message: 'Video no encontrado' });
-    }
-
-    const item = response.data.items[0];
-    
-    const videoDetails = {
-      id: item.id,
-      title: item.snippet.title,
-      channelName: item.snippet.channelTitle,
-        channelAvatarUrl: 'https://yt3.ggpht.com/ytc/AIdro_k-3so22Fj9KMb52-323x2-A1Ww2d2s5a2x4A=s88-c-k-c0x00ffffff-no-rj', 
-      views: `${Math.round(item.statistics.viewCount / 1000)}k`,
-      publishedAt: new Date(item.snippet.publishedAt).toLocaleDateString('es-MX'),
-    };
+    const videoDetails = response.data.items.map(item => ({
+        id: item.id,
+        thumbnailUrl: item.snippet.thumbnails.medium.url,
+        title: item.snippet.title,
+        channelName: item.snippet.channelTitle,
+        channelAvatarUrl: `https://picsum.photos/48?random=${item.id}`,
+        views: `${Math.round(item.statistics.viewCount / 1000)}k`,
+        publishedAt: new Date(item.snippet.publishedAt).toLocaleDateString('es-MX'),
+    }));
     
     res.json(videoDetails);
 

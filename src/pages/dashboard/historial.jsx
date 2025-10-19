@@ -9,40 +9,74 @@ export function Historial() {
   const [filter, setFilter] = useState('all'); // Filtro por defecto
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      setIsLoading(true);
-      const token = localStorage.getItem('token');
-      if (!token) return;
+useEffect(() => {
+  const fetchHistory = async () => {
+    setIsLoading(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setIsLoading(false);
+      setVideos([]);
+      return;
+    }
 
-      try {
-        // 1. Obtiene la lista de IDs de video del historial
-        const historyResponse = await fetch(`/api/users/history?period=${filter}`);
-        const historyData = await historyResponse.json();
-        
-        if (historyData.length === 0) {
-            setVideos([]);
-            setIsLoading(false);
-            return;
-        }
+    try {
+      const historyResponse = await fetch(`/api/users/history?period=${filter}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      });
 
-        // 2. Convierte la lista de IDs a una cadena para la API de YouTube
-        const videoIds = historyData.map(item => item.videoId).join(',');
-
-        // 3. Pide a tu backend los detalles de todos esos videos en una sola llamada
-        const videosResponse = await fetch(`/api/youtube/video/${videoIds}`);
-        const videosData = await videosResponse.json();
-        setVideos(videosData);
-
-      } catch (error) {
-        console.error("Error al cargar el historial:", error);
-      } finally {
-        setIsLoading(false);
+      if (!historyResponse.ok) {
+        // Log específico si la petición al backend falla
+        console.error('Error del backend al pedir historial:', historyResponse.status, await historyResponse.text());
+        throw new Error('Error al obtener el historial del servidor');
       }
-    };
 
-    fetchHistory();
-  }, [filter]); // Se ejecuta cada vez que el filtro cambia
+      const historyData = await historyResponse.json();
+      // 👇 LOG 1: ¿Llegan los IDs del historial? 👇
+      console.log('Historial recibido del backend (IDs):', historyData);
+
+      if (!Array.isArray(historyData)) {
+         console.error('La respuesta del historial no es un array:', historyData);
+         throw new Error('Formato de historial inesperado');
+      }
+
+      if (historyData.length === 0) {
+        console.log('El historial está vacío para este período.');
+        setVideos([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const videoIds = historyData.map(item => item.videoId).join(',');
+      // 👇 LOG 2: ¿Se están formando bien los IDs para YouTube? 👇
+      console.log('Pidiendo detalles para los IDs:', videoIds);
+
+      const videosResponse = await fetch(`/api/youtube/video/${videoIds}`);
+
+      if (!videosResponse.ok) {
+        // Log si la petición a YouTube falla
+        console.error('Error del backend al pedir detalles a YouTube:', videosResponse.status, await videosResponse.text());
+        throw new Error('Error al obtener detalles de videos');
+      }
+
+      const videosData = await videosResponse.json();
+      // 👇 LOG 3: ¿Llegan los detalles de los videos? 👇
+      console.log('Detalles de videos recibidos:', videosData);
+      setVideos(videosData);
+
+    } catch (error) {
+      console.error("Error final en fetchHistory:", error); // Muestra cualquier error capturado
+      setVideos([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchHistory();
+}, [filter]);
 
   return (
     <div className="mt-12">

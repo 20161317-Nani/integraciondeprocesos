@@ -27,7 +27,7 @@ import {
 } from "@/data";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { VideoCard } from "@/widgets/cards/videocard";
 
 export function Video() {
@@ -36,49 +36,103 @@ export function Video() {
   const [suggestedVideos, setSuggestedVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Esta función se ejecuta cada vez que el videoId cambia
-    const fetchVideoData = async () => {
-      setIsLoading(true);
-      try {
-        // Petición para obtener los detalles del video principal
-        const detailsResponse = await fetch(`/api/youtube/video/${videoId}`);
-        const detailsData = await detailsResponse.json();
-        setVideoDetails(detailsData);
+  // Referencia para evitar doble guardado
+  const hasLoggedHistory = useRef(false);
 
-        // Petición para obtener videos sugeridos (reusamos la de videos populares por ahora)
-        const suggestedResponse = await fetch(`/api/youtube/videos`);
-        const suggestedData = await suggestedResponse.json();
-        setSuggestedVideos(suggestedData.filter(v => v.id !== videoId)); // Excluimos el video actual de las sugerencias
+useEffect(() => {
+  // 👇 1. Bandera para rastrear si el componente está montado
+  let isMounted = true; 
 
-      } catch (error) {
-        console.error("Error al cargar los datos del video:", error);
-      } finally {
-        setIsLoading(false);
+  const logHistory = async () => {
+    if (!isMounted) return; // Verifica si sigue montado
+
+    const token = localStorage.getItem('token');
+    console.log("(Video.jsx) Token leído de localStorage:", token);
+    
+    if (token && videoId) {
+    console.log(`(Video.jsx) Intentando guardar historial para videoId: ${videoId}`); 
+    try {
+      // 👇 ASEGÚRATE DE QUE ESTE BLOQUE 'headers' ESTÉ COMPLETO 👇
+      const response = await fetch('/api/users/history', { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-auth-token': token, // Esta cabecera es esencial
+          },
+          body: JSON.stringify({ videoId: videoId }),
+         });
+      
+      if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(`Error del servidor al guardar historial: ${response.status} - ${errorData}`);
       }
-    };
 
-    const logHistory = async () => {
-      const token = localStorage.getItem('token');
-      if (token && videoId) {
-        try {
-          await fetch('/api/users/history', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-auth-token': token,
-            },
-            body: JSON.stringify({ videoId: videoId }),
-          });
-        } catch (error) {
-          console.error("No se pudo guardar el historial:", error);
+      if (isMounted) {
+          console.log("(Video.jsx) Petición para guardar historial enviada con éxito."); 
+      }
+      // No necesitamos marcar hasLoggedHistory aquí con isMounted
+      // porque la limpieza del useEffect ya maneja la lógica de StrictMode
+
+    } catch (error) {
+      if (isMounted) { 
+          console.error("(Video.jsx) No se pudo guardar el historial:", error);
+      }
+    }
+  } else {
+     if (isMounted) {
+        console.log("(Video.jsx) No hay token o videoId, no se guarda historial.");
+     }
+  }
+};
+
+  const fetchVideoData = async () => {
+    setIsLoading(true);
+    setVideoDetails(null); 
+    setSuggestedVideos([]); 
+
+    try {
+      const detailsResponse = await fetch(`/api/youtube/video/${videoId}`);
+      // ... (manejo de error si detailsResponse no es ok) ...
+      const detailsData = await detailsResponse.json();
+      
+      if (!detailsData || detailsData.length === 0) { /* ... */ }
+      
+      // 👇 4. Verifica si sigue montado antes de actualizar estado y llamar a logHistory
+      if (isMounted) {
+          setVideoDetails(detailsData[0]); 
+          await logHistory(); // Llama a guardar aquí
+      }
+
+      // ... (código para cargar videos sugeridos, también con check de isMounted si es async) ...
+      const suggestedResponse = await fetch(`/api/youtube/videos`);
+      // ... (manejo de error) ...
+      const suggestedData = await suggestedResponse.json();
+      if (isMounted) {
+          setSuggestedVideos(suggestedData.filter(v => v.id !== videoId));
+      }
+
+    } catch (error) { 
+        if (isMounted) {
+            console.error("(Video.jsx) Error en fetchVideoData:", error);
+            setVideoDetails(null);
         }
-      }
-    };
+    } finally { 
+        if (isMounted) {
+            setIsLoading(false);
+        }
+    }
+  };
 
-    fetchVideoData();
-  }, [videoId]);
+  fetchVideoData();
 
+  // 👇 5. LA FUNCIÓN DE LIMPIEZA 👇
+  // Esta función se ejecuta automáticamente cuando el componente se desmonta
+  // (o antes de que el efecto se ejecute de nuevo si las dependencias cambian)
+  return () => {
+    isMounted = false; // Marca el componente como desmontado
+  };
+    
+}, [videoId]); // El array de dependencias no cambia
   if (isLoading) {
     return <Typography className="mt-12">Cargando video...</Typography>;
   }

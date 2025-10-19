@@ -39,19 +39,35 @@ router.put('/location', auth, async (req, res) => {
 router.post('/history', auth, async (req, res) => {
   try {
     const { videoId } = req.body;
-    if (!videoId) {
-      return res.status(400).json({ message: 'Se requiere el ID del video' });
+    if (!videoId) return res.status(400).json({ message: 'Se requiere el ID del video' });
+    
+    console.log(`Intentando guardar video ${videoId} para usuario ${req.user.id}`); 
+    
+    const user = await User.findById(req.user.id);
+    if (!user) {
+        console.log("Usuario no encontrado al intentar guardar historial.");
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // 👇 CAMBIO: Usa 'historial' 👇
+    if (!Array.isArray(user.historial)) { 
+        user.historial = [];           
     }
     
-    // Busca al usuario y añade el video a su historial
-    // $push añade un elemento al array 'history'
-    await User.findByIdAndUpdate(req.user.id, {
-      $push: { history: { videoId: videoId, watchedAt: new Date() } }
-    });
+    // 👇 CAMBIO: Usa 'historial' 👇
+    user.historial.push({ videoId: videoId, watchedAt: new Date() }); 
+    
+    const updatedUser = await user.save();
+    
+    // 👇 CAMBIO: Usa 'historial' 👇
+    console.log(
+      'Usuario actualizado (últimos 5 historial):', 
+      updatedUser && updatedUser.historial ? updatedUser.historial.slice(-5) : 'Historial no disponible o error'
+    ); 
     
     res.status(200).json({ message: 'Video añadido al historial' });
   } catch (error) {
-    console.error('Error al guardar en historial:', error);
+    console.error('Error al guardar en historial:', error); 
     res.status(500).send('Error en el servidor');
   }
 });
@@ -62,13 +78,37 @@ router.post('/history', auth, async (req, res) => {
 // @acceso  Privado
 router.get('/history', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    let history = user.history.reverse(); // Muestra los más recientes primero
+    console.log(`--- GET /history ---`);
+    console.log(`Buscando historial para usuario ID: ${req.user.id}`);
 
-    const { period } = req.query; // Obtiene el filtro de la URL (day, week, etc.)
-    const now = new Date();
+    // 👇 CAMBIO: Pide el usuario completo SIN NINGÚN .select() 👇
+    const user = await User.findById(req.user.id); 
+
+    // LOG: Muestra el objeto user completo que devuelve Mongoose
+    console.log("Objeto User recuperado de BD:", user); 
+
+    if (!user) {
+      console.log('Usuario NO encontrado.');
+      return res.json([]);
+    }
+    console.log('Usuario encontrado.');
+
+    // Ahora accedemos a user.history
+    // 👇 CAMBIO: Usa 'historial' 👇
+    console.log(`Campo 'historial' existe: ${user.historial !== undefined}, Es array: ${Array.isArray(user.historial)}`);
     
-    if (period) {
+    // 👇 CAMBIO: Usa 'historial' 👇
+    const historyArray = Array.isArray(user.historial) ? user.historial : []; 
+    
+    console.log(`Historial crudo recuperado: ${historyArray.length} elementos.`);
+    console.log(`Primeros 5 elementos (si existen):`, historyArray.slice(0, 5));
+
+    let finalHistory = [...historyArray].reverse();
+
+    // --- Tu lógica de filtrado (sin cambios) ---
+    const { period } = req.query;
+    const now = new Date();
+    if (period && period !== 'all') { // Añadido check para 'all'
       let startDate;
       switch (period) {
         case 'day':
@@ -85,19 +125,21 @@ router.get('/history', auth, async (req, res) => {
           break;
         default:
           break;
-      }
+    }
       if (startDate) {
-        history = history.filter(item => new Date(item.watchedAt) >= startDate);
+        finalHistory = finalHistory.filter(item => new Date(item.watchedAt) >= startDate);
       }
     }
+    // --- Fin lógica de filtrado ---
 
-    res.json(history);
+console.log(`Enviando historial filtrado (${period || 'all'}): ${finalHistory.length} elementos.`);
+    res.json(finalHistory);
+
   } catch (error) {
-    console.error('Error al obtener historial:', error);
+    console.error('Error GRAVE al obtener historial:', error); 
     res.status(500).send('Error en el servidor');
   }
 });
-
 
 
 module.exports = router;
