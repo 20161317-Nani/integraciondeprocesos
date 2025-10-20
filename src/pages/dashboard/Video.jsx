@@ -28,7 +28,7 @@ import {
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import { VideoCard } from "@/widgets/cards/Videocard";
+import { VideoCard } from "@/widgets/cards/VideoCard";
 
 export function Video() {
   const { videoId } = useParams(); // Obtiene el ID del video desde la URL
