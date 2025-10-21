@@ -142,4 +142,63 @@ console.log(`Enviando historial filtrado (${period || 'all'}): ${finalHistory.le
 });
 
 
+// @ruta    POST /api/users/save-video
+// @desc    Añadir o quitar un video de la lista de guardados (toggle)
+// @acceso  Privado
+router.post('/save-video', auth, async (req, res) => {
+  try {
+    const { videoId } = req.body;
+    if (!videoId) {
+      return res.status(400).json({ message: 'Se requiere el ID del video' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Asegúrate de que savedVideos sea un array
+    if (!Array.isArray(user.savedVideos)) {
+      user.savedVideos = [];
+    }
+
+    const savedIndex = user.savedVideos.indexOf(videoId);
+    let updatedUser;
+
+    if (savedIndex > -1) {
+      // Si ya está guardado, quitarlo
+      user.savedVideos.splice(savedIndex, 1);
+      updatedUser = await user.save();
+      res.json({ message: 'Video quitado de guardados', savedVideos: updatedUser.savedVideos });
+    } else {
+      // Si no está guardado, añadirlo
+      user.savedVideos.push(videoId);
+      updatedUser = await user.save();
+      res.json({ message: 'Video guardado', savedVideos: updatedUser.savedVideos });
+    }
+  } catch (error) {
+    console.error('Error al guardar/quitar video:', error);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
+
+// @ruta    GET /api/users/saved
+// @desc    Obtener la lista de IDs de videos guardados del usuario
+// @acceso  Privado
+router.get('/saved', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('savedVideos');
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    // Devuelve el objeto con la propiedad 'savedVideos'
+    res.json({ savedVideos: user.savedVideos || [] }); 
+  } catch (error) {
+    console.error('Error al obtener videos guardados:', error);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
+
 module.exports = router;

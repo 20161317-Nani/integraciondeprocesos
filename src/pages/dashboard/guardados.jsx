@@ -1,76 +1,104 @@
-import React, { useState } from "react";
-import {
-  Typography,
-  Card,
-  CardBody,
-  Input,
-} from "@material-tailwind/react";
+import React, { useState, useEffect } from "react";
+import { Typography, Input } from "@material-tailwind/react";
+import { VideoCard } from "@/widgets/cards";
+import ProtectedContent from '@/components/ProtectedContent';
 import { BookmarkIcon } from "@heroicons/react/24/outline";
-import ProtectedContent from '@/components/ProtectedContent'; // Importar el contenido protegido
+import { set } from "mongoose";
 
 export function Guardados() {
+  const [savedVideoIds, setSavedVideoIds] = useState([]);
+  const [videos, setVideos] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [savedIdsSet, setSavedIdsSet] = useState(new Set()); // Para pasar al VideoCard
 
-  // Datos de ejemplo para los videos guardados
-  const videosGuardados = [
-    { id: 1, title: "Video Tutorial React", duration: "10:23" },
-    { id: 2, title: "Material Tailwind Tips", duration: "5:12" },
-    { id: 3, title: "Aprende JavaScript", duration: "8:45" },
-    { id: 4, title: "Next.js para principiantes", duration: "12:30" },
-  ];
+  useEffect(() => {
+    const fetchSavedData = async () => {
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) return;
 
-  // Filtrar videos según búsqueda
-  const filteredVideos = videosGuardados.filter((video) =>
+      try {
+        // 1. Obtener IDs de videos guardados
+      const idsResponse = await fetch('/api/users/saved', { 
+        headers: { 'x-auth-token': token },
+      });
+      
+      // Verifica si la respuesta fue exitosa (NO fue 404)
+      if (!idsResponse.ok) {
+        console.error('Error del backend al pedir IDs guardados:', idsResponse.status);
+        throw new Error('Error al obtener IDs guardados');
+      }
+        const idsData = await idsResponse.json();
+
+      if (!idsData || !Array.isArray(idsData.savedVideos)) {
+          console.error('Formato inesperado de IDs guardados:', idsData);
+          throw new Error('Formato inesperado de IDs guardados');
+      }
+        const savedIds = idsData.savedVideos || [];
+        setSavedVideoIds(savedIds);
+        setSavedIdsSet(new Set(savedIds)); // Guarda el Set para el botón
+
+        if (savedIds.length === 0) {
+          setVideos([]);
+          setIsLoading(false);
+          return;
+        }
+
+        // 2. Obtener detalles de esos videos
+        const videoIdsString = savedIds.join(',');
+        const videosResponse = await fetch(`/api/youtube/video/${videoIdsString}`);
+
+        if (!videosResponse.ok) {
+          console.error('Error del backend al pedir detalles:', videosResponse.status);
+          throw new Error('Error al obtener detalles de videos');
+      }
+
+        const videosData = await videosResponse.json();
+        setVideos(videosData);
+
+      } catch (error) {
+        console.error("Error al cargar videos guardados:", error);
+        setVideos([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSavedData();
+  }, []); // Solo se ejecuta al montar
+
+  const filteredVideos = videos.filter((video) =>
     video.title.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
+    <ProtectedContent message="Para ver tus videos guardados, debes iniciar sesión.">
+      <div className="mt-12 flex flex-col gap-4">
+        <div className="flex items-center gap-2 mb-4">
+          <BookmarkIcon className="w-6 h-6 text-blue-500" />
+          <Input /* ... props de búsqueda ... */ />
+        </div>
 
-    <ProtectedContent message="Para tener la mejor experiencia y administración de tus playlists guardadas, debes iniciar sesión.">
-      {/* Todo lo que está aquí adentro solo se mostrará si el usuario ha iniciado sesión 
-        // Una vez que los datos llegan, muestra el perfil*/}
-    <div className="mt-12 flex flex-col gap-4">
-      {/* Barra de búsqueda */}
-      <div className="flex items-center gap-2 mb-4">
-        <BookmarkIcon className="w-6 h-6 text-green-500" />
-        <Input
-          type="text"
-          placeholder="Buscar en tus videos guardados..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full"
-        />
-      </div>
-
-      {/* Recuadros de videos guardados */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filteredVideos.length > 0 ? (
-          filteredVideos.map((video) => (
-            <Card
-              key={video.id}
-              className="shadow-lg rounded-lg overflow-hidden hover:scale-105 transition-transform duration-200"
-            >
-              <div className="bg-gray-300 w-full aspect-video flex items-center justify-center text-gray-700 font-semibold">
-                Miniatura
-              </div>
-              <CardBody>
-                <Typography variant="h6" className="font-bold">
-                  {video.title}
-                </Typography>
-                <Typography variant="small" className="text-gray-600">
-                  Duración: {video.duration}
-                </Typography>
-              </CardBody>
-            </Card>
-          ))
+        {isLoading ? (
+          <Typography>Cargando videos guardados...</Typography>
         ) : (
-          <Typography className="col-span-full text-center text-gray-500 mt-4">
-            No se encontraron videos guardados
-          </Typography>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredVideos.length > 0 ? (
+              filteredVideos.map((video) => (
+                // Pasa el Set de IDs guardados al VideoCard
+                <VideoCard key={video.id} video={video} savedVideoIds={savedIdsSet} /> 
+              ))
+            ) : (
+              <Typography className="col-span-full text-center text-gray-500 mt-4">
+                {search ? 'No se encontraron videos guardados con ese título.' : 'Aún no has guardado ningún video.'}
+              </Typography>
+            )}
+          </div>
         )}
       </div>
-    </div>
-        </ProtectedContent>
+    </ProtectedContent>
   );
 }
 

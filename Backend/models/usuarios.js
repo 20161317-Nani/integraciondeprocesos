@@ -26,12 +26,16 @@ const UserSchema = new mongoose.Schema({
     }
   ],
 
+  savedVideos: {
+    type: [String], // Un array de IDs de video (Strings)
+    default: [],
+  },
+
   // Campos para recuperar la contraseña
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 
 });
-
 
 
 UserSchema.index({ location: '2dsphere' });

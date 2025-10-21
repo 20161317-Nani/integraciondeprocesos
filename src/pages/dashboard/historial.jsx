@@ -12,71 +12,78 @@ export function Historial() {
 useEffect(() => {
   const fetchHistory = async () => {
     setIsLoading(true);
+    setVideos([]); // Limpia videos anteriores al iniciar la carga
     const token = localStorage.getItem('token');
     if (!token) {
-      setIsLoading(false);
-      setVideos([]);
-      return;
+      setIsLoading(false); 
+      return; 
     }
 
     try {
+      // 1. Obtiene la lista COMPLETA de IDs del historial (objetos {videoId, watchedAt})
       const historyResponse = await fetch(`/api/users/history?period=${filter}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'x-auth-token': token,
+          'x-auth-token': token, 
         },
       });
 
       if (!historyResponse.ok) {
-        // Log específico si la petición al backend falla
-        console.error('Error del backend al pedir historial:', historyResponse.status, await historyResponse.text());
         throw new Error('Error al obtener el historial del servidor');
       }
-
+      
       const historyData = await historyResponse.json();
-      // 👇 LOG 1: ¿Llegan los IDs del historial? 👇
-      console.log('Historial recibido del backend (IDs):', historyData);
+      console.log('Historial recibido (objetos completos):', historyData);
 
       if (!Array.isArray(historyData)) {
-         console.error('La respuesta del historial no es un array:', historyData);
          throw new Error('Formato de historial inesperado');
       }
 
       if (historyData.length === 0) {
-        console.log('El historial está vacío para este período.');
-        setVideos([]);
+        console.log('El historial está vacío.');
         setIsLoading(false);
         return;
       }
 
-      const videoIds = historyData.map(item => item.videoId).join(',');
-      // 👇 LOG 2: ¿Se están formando bien los IDs para YouTube? 👇
-      console.log('Pidiendo detalles para los IDs:', videoIds);
+      // 👇 2. EXTRAE IDs ÚNICOS y LIMITA la cantidad 👇
+      const uniqueVideoIds = [...new Set(historyData.map(item => item.videoId))]; // Obtiene IDs únicos
+      const limitedVideoIds = uniqueVideoIds.slice(0, 50); // Limita a 50 (límite de la API)
+      
+      console.log('IDs únicos a pedir detalles:', limitedVideoIds);
 
-      const videosResponse = await fetch(`/api/youtube/video/${videoIds}`);
-
+      // 3. Pide detalles SÓLO para esos IDs limitados y únicos
+      const videoIdsString = limitedVideoIds.join(',');
+      const videosResponse = await fetch(`/api/youtube/video/${videoIdsString}`);
+      
       if (!videosResponse.ok) {
-        // Log si la petición a YouTube falla
-        console.error('Error del backend al pedir detalles a YouTube:', videosResponse.status, await videosResponse.text());
         throw new Error('Error al obtener detalles de videos');
       }
 
       const videosData = await videosResponse.json();
-      // 👇 LOG 3: ¿Llegan los detalles de los videos? 👇
       console.log('Detalles de videos recibidos:', videosData);
-      setVideos(videosData);
+      
+      // 4. (Opcional pero recomendado) Ordena los videos según el historial original
+      // Crea un mapa para buscar detalles rápido por ID
+      const videoDetailsMap = new Map(videosData.map(video => [video.id, video]));
+      // Mapea el historial original para obtener los videos ordenados y con duplicados si es necesario
+      const orderedVideos = historyData
+                              .map(historyItem => videoDetailsMap.get(historyItem.videoId))
+                              .filter(Boolean); // Filtra por si algún video ya no existe en YouTube
+
+      setVideos(orderedVideos); // Muestra los videos en orden de visualización
 
     } catch (error) {
-      console.error("Error final en fetchHistory:", error); // Muestra cualquier error capturado
-      setVideos([]);
+      console.error("Error final en fetchHistory:", error); 
+      setVideos([]); // Limpia videos en caso de error
     } finally {
       setIsLoading(false);
     }
   };
 
   fetchHistory();
-}, [filter]);
+}, [filter]); // Se ejecuta cada vez que el filtro cambia
+
 
   return (
     <div className="mt-12">
