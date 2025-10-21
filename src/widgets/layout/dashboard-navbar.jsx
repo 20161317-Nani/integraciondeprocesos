@@ -15,7 +15,8 @@ import {
   MagnifyingGlassIcon,
   SunIcon,
   MoonIcon,
-  LanguageIcon, // 👈 Importamos el nuevo ícono de idioma/traductor
+  // 👈 Importamos el ícono del traductor
+  LanguageIcon, 
 } from "@heroicons/react/24/solid";
 import {
   useMaterialTailwindController,
@@ -23,6 +24,9 @@ import {
   setOpenSidenav,
   setDarkMode,
 } from "@/context";
+
+// Definimos los códigos de idioma disponibles
+const languages = ["ES", "EN", "PT", "ZH", "JA", "FR"];
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -32,6 +36,9 @@ export function DashboardNavbar() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const token = localStorage.getItem("token");
+
+  // 1. Estado para rastrear el idioma actual (inicia en ES = índice 0)
+  const [currentLangIndex, setCurrentLangIndex] = useState(0);
 
   const executeSearch = () => {
     if (searchTerm.trim() !== "") {
@@ -43,11 +50,16 @@ export function DashboardNavbar() {
     if (event.key === "Enter") executeSearch();
   };
 
-  // 👈 Función de ejemplo para el botón de traductor
+  // 2. Función para cambiar al siguiente idioma en el ciclo
   const handleTranslateClick = () => {
-    console.log("Botón de traductor presionado. Implementa la lógica de traducción aquí.");
-    // Aquí puedes añadir la lógica para abrir un modal de traducción,
-    // o llamar a un servicio de traducción, etc.
+    // Calcula el índice del siguiente idioma (cicla de vuelta a 0 después del último)
+    const nextIndex = (currentLangIndex + 1) % languages.length;
+    setCurrentLangIndex(nextIndex);
+
+    // NOTA: Esta es la parte donde integrarías tu librería i18n
+    const nextLang = languages[nextIndex];
+    console.log(`[i18n] Cambiando idioma a: ${nextLang}. Aquí debes llamar a tu función de traducción.`);
+    // Ejemplo i18next: i18n.changeLanguage(nextLang.toLowerCase());
   };
 
   return (
@@ -117,17 +129,27 @@ export function DashboardNavbar() {
             <Bars3Icon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
           </IconButton>
 
-          {/* Botón Traductor (Nuevo) */}
-          <IconButton
-            variant="text"
-            color="blue-gray"
-            onClick={handleTranslateClick} // 👈 Nuevo manejador de clics
-            className="transition-colors"
-          >
-            <LanguageIcon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
-          </IconButton>
-
-          {/* Botón modo oscuro (Mantenido) */}
+          {/* 3. Botón Traductor (Nuevo con indicador de idioma) */}
+          <div className="relative">
+            <IconButton
+              variant="text"
+              color="blue-gray"
+              onClick={handleTranslateClick} // 👈 Llama a la función de cambio de idioma
+              className="transition-colors"
+            >
+              <LanguageIcon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
+            </IconButton>
+            
+            {/* Etiqueta para mostrar el código del idioma actual */}
+            <span 
+              className={`absolute -bottom-1 -right-1 text-[10px] font-bold rounded-full px-1 
+                         ${darkMode ? "bg-white text-gray-900" : "bg-blue-gray-900 text-white"}`}
+            >
+              {languages[currentLangIndex]}
+            </span>
+          </div>
+          
+          {/* Botón modo oscuro (Existente) */}
           <IconButton
             variant="text"
             color="blue-gray"
