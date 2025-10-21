@@ -1,83 +1,92 @@
 import PropTypes from "prop-types";
 import { Link, NavLink } from "react-router-dom";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline";
 import {
-  Avatar,
   Button,
   IconButton,
   Typography,
 } from "@material-tailwind/react";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
-import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline";
 
 export function Sidenav({ brandImg, brandName, routes }) {
   const [controller, dispatch] = useMaterialTailwindController();
-  const { sidenavColor, sidenavType, openSidenav } = controller;
+  const { sidenavColor, sidenavType, openSidenav, darkMode } = controller;
+
+  // Tipos base de sidenav (tema claro)
   const sidenavTypes = {
-    dark: "bg-gradient-to-br from-gray-800 to-gray-900",
-    white: "bg-white shadow-sm",
-    transparent: "bg-transparent",
+    dark: "bg-gradient-to-br from-gray-800 to-gray-900 text-white",
+    white: "bg-white text-blue-gray-900 shadow-sm",
+    transparent: "bg-transparent text-blue-gray-900",
   };
 
-  // Función para cerrar sesión
-   const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/auth/sign-in';
+  // Aplica el modo oscuro (sobrescribe colores)
+  const darkModeClasses = darkMode
+    ? "bg-gradient-to-br from-gray-900 to-gray-800 text-white border-gray-700"
+    : "border border-blue-gray-100";
+
+  // Cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/auth/sign-in";
   };
 
-  // Verifica si el usuario está logeado
-  const token = localStorage.getItem('token');
-
+  // Token del usuario logeado
+  const token = localStorage.getItem("token");
 
   return (
     <aside
-      className={`${sidenavTypes[sidenavType]} ${
-        openSidenav ? "translate-x-0" : "-translate-x-80"
-      } fixed inset-0 z-50 my-4 ml-4 h-[calc(100vh-32px)] w-72 rounded-xl transition-transform duration-300 xl:translate-x-0 border border-blue-gray-100`}
+      className={`${sidenavTypes[sidenavType]} fixed inset-0 z-50 my-4 ml-4 
+        h-[calc(100vh-32px)] w-72 rounded-xl transition-transform duration-300 
+        ${darkModeClasses} 
+        ${openSidenav ? "translate-x-0 xl:translate-x-0" : "-translate-x-80 xl:-translate-x-80"}
+      `}
     >
-      <div
-        className={`relative`}
-      >
-        <Link to="/" className="py-6 px-8 text-center">
+      {/* 🔹 Encabezado del menú */}
+      <div className="relative">
+        <Link to="/" className="py-6 px-8 text-center block">
           <Typography
             variant="h6"
-            color={sidenavType === "dark" ? "white" : "blue-gray"}
+            color={darkMode ? "white" : sidenavType === "dark" ? "white" : "blue-gray"}
           >
             {brandName}
           </Typography>
         </Link>
+
+        {/*  Botón para cerrar sidenav en móviles */}
         <IconButton
           variant="text"
-          color="white"
+          color={darkMode ? "white" : "blue-gray"}
           size="sm"
           ripple={false}
           className="absolute right-0 top-0 grid rounded-br-none rounded-tl-none xl:hidden"
           onClick={() => setOpenSidenav(dispatch, false)}
         >
-          <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
+          <XMarkIcon
+            strokeWidth={2.5}
+            className={`h-5 w-5 ${darkMode ? "text-white" : "text-blue-gray-800"}`}
+          />
         </IconButton>
       </div>
+
+      {/* 🔹 Lista de rutas */}
       <div className="m-4">
         {routes.map(({ layout, title, pages }, key) => (
           <ul key={key} className="mb-4 flex flex-col gap-1">
-            {title && ( 
-              
-               <li className="mx-3.5 mt-4 mb-2">
-        <Typography
-          variant="small"
-          color={sidenavType === "dark" ? "white" : "blue-gray"}
-          className="font-black uppercase opacity-75"
-        >
-          {title}
-        </Typography>
-      </li>
-    )}
+            {title && (
+              <li className="mx-3.5 mt-4 mb-2">
+                <Typography
+                  variant="small"
+                  color={darkMode ? "white" : sidenavType === "dark" ? "white" : "blue-gray"}
+                  className="font-black uppercase opacity-75"
+                >
+                  {title}
+                </Typography>
+              </li>
+            )}
+
             {pages
-              // 1. Primero, filtra solo las páginas que tienen nombre e ícono
-              .filter((page) => page.name && page.icon) 
-              // 2. Luego, mapea sobre esa lista filtrada
-              .map(({ icon, name, path, isPrivate }) => (
-                // 3. Finalmente, aplica la lógica de visibilidad que ya tenías
+              .filter((page) => page.name && page.icon)
+              .map(({ icon, name, path, isPrivate }) =>
                 (!isPrivate || token) && (
                   <li key={path}>
                     <NavLink to={`/${layout}${path}`}>
@@ -87,6 +96,8 @@ export function Sidenav({ brandImg, brandName, routes }) {
                           color={
                             isActive
                               ? sidenavColor
+                              : darkMode
+                              ? "white"
                               : sidenavType === "dark"
                               ? "white"
                               : "blue-gray"
@@ -95,10 +106,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
                           fullWidth
                         >
                           {icon}
-                          <Typography
-                            color="inherit"
-                            className="font-medium capitalize"
-                          >
+                          <Typography color="inherit" className="font-medium capitalize">
                             {name}
                           </Typography>
                         </Button>
@@ -106,15 +114,17 @@ export function Sidenav({ brandImg, brandName, routes }) {
                     </NavLink>
                   </li>
                 )
-            ))}
+              )}
           </ul>
         ))}
       </div>
-  {token && (
+
+      {/* 🔹 Botón cerrar sesión */}
+      {token && (
         <div className="absolute bottom-4 w-full px-4">
           <Button
             variant="text"
-            color={sidenavType === "red" ? "red" : "red"}
+            color="red"
             className="flex items-center gap-4 px-4 capitalize"
             fullWidth
             onClick={handleLogout}
