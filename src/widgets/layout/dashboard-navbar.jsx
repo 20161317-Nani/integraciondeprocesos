@@ -15,6 +15,7 @@ import {
   MagnifyingGlassIcon,
   SunIcon,
   MoonIcon,
+  LanguageIcon, // 👈 Importamos el nuevo ícono de idioma/traductor
 } from "@heroicons/react/24/solid";
 import {
   useMaterialTailwindController,
@@ -40,6 +41,13 @@ export function DashboardNavbar() {
 
   const handleSearchKeyDown = (event) => {
     if (event.key === "Enter") executeSearch();
+  };
+
+  // 👈 Función de ejemplo para el botón de traductor
+  const handleTranslateClick = () => {
+    console.log("Botón de traductor presionado. Implementa la lógica de traducción aquí.");
+    // Aquí puedes añadir la lógica para abrir un modal de traducción,
+    // o llamar a un servicio de traducción, etc.
   };
 
   return (
@@ -109,7 +117,17 @@ export function DashboardNavbar() {
             <Bars3Icon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
           </IconButton>
 
-          {/* Botón modo oscuro */}
+          {/* Botón Traductor (Nuevo) */}
+          <IconButton
+            variant="text"
+            color="blue-gray"
+            onClick={handleTranslateClick} // 👈 Nuevo manejador de clics
+            className="transition-colors"
+          >
+            <LanguageIcon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
+          </IconButton>
+
+          {/* Botón modo oscuro (Mantenido) */}
           <IconButton
             variant="text"
             color="blue-gray"
