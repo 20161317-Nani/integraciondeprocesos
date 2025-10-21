@@ -7,10 +7,6 @@ import {
   IconButton,
   Breadcrumbs,
   Input,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
 } from "@material-tailwind/react";
 import {
   UserCircleIcon,
@@ -28,16 +24,6 @@ import {
   setDarkMode,
 } from "@/context";
 
-// Idiomas disponibles
-const languages = [
-  { code: "es", name: "Español" },
-  { code: "en", name: "English" },
-  { code: "pt", name: "Português" },
-  { code: "zh", name: "中文 (Chino)" },
-  { code: "ja", name: "日本語 (Japonés)" },
-  { code: "fr", name: "Français" },
-];
-
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav, darkMode } = controller;
@@ -47,7 +33,9 @@ export function DashboardNavbar() {
   const [searchTerm, setSearchTerm] = useState("");
   const token = localStorage.getItem("token");
 
-  const [currentLangCode, setCurrentLangCode] = useState("es");
+  // Textos traducidos (si quieres integrar tu API luego)
+  const [translatedLayout, setTranslatedLayout] = useState(layout);
+  const [translatedPage, setTranslatedPage] = useState(page);
 
   const executeSearch = () => {
     if (searchTerm.trim() !== "") {
@@ -59,14 +47,11 @@ export function DashboardNavbar() {
     if (event.key === "Enter") executeSearch();
   };
 
-  const handleLanguageChange = (code) => {
-    setCurrentLangCode(code);
-    console.log("Idioma seleccionado:", code);
-    // Aquí puedes agregar tu lógica de traducción, ej. i18n.changeLanguage(code)
+  const handleLanguageClick = () => {
+    // Activa el select de Google Translate
+    const select = document.querySelector(".goog-te-combo");
+    if (select) select.dispatchEvent(new Event("change"));
   };
-
-  const currentLang = languages.find((lang) => lang.code === currentLangCode);
-  const currentLangDisplay = currentLang ? currentLang.code.toUpperCase() : "ES";
 
   return (
     <Navbar
@@ -93,21 +78,21 @@ export function DashboardNavbar() {
                 color="blue-gray"
                 className="font-normal opacity-50 transition-all hover:text-blue-500 hover:opacity-100"
               >
-                {layout}
+                {translatedLayout}
               </Typography>
             </Link>
             <Typography variant="small" color="blue-gray" className="font-normal">
-              {page}
+              {translatedPage}
             </Typography>
           </Breadcrumbs>
           <Typography variant="h6" color={darkMode ? "white" : "blue-gray"}>
-            {page}
+            {translatedPage}
           </Typography>
         </div>
 
         {/* Barra de búsqueda y botones */}
         <div className="flex items-center gap-2 md:gap-4">
-          {/* 🔍 Barra de búsqueda */}
+          {/* Barra de búsqueda */}
           <div className="relative mr-auto md:mr-4 md:w-64">
             <Input
               label="Buscar"
@@ -132,57 +117,34 @@ export function DashboardNavbar() {
             className="xl:hidden"
             onClick={() => setOpenSidenav(dispatch, !openSidenav)}
           >
-            <Bars3Icon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
+            <Bars3Icon
+              className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`}
+            />
           </IconButton>
 
-          {/* Botón de idiomas */}
-          <Menu>
-            <MenuHandler>
-              <div className="relative cursor-pointer">
-                <IconButton
-                  variant="text"
-                  color="blue-gray"
-                  className="transition-colors"
-                >
-                  <LanguageIcon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
-                </IconButton>
-                <span
-                  className={`absolute -bottom-1 -right-1 text-[10px] font-bold rounded-full px-1 
-                             ${darkMode ? "bg-white text-gray-900" : "bg-blue-gray-900 text-white"}`}
-                >
-                  {currentLangDisplay}
-                </span>
-              </div>
-            </MenuHandler>
-            <MenuList className={darkMode ? "bg-gray-800 border-gray-700" : ""}>
-              <Typography variant="small" className="p-2 font-bold opacity-70">
-                Seleccionar Idioma
-              </Typography>
-              {languages.map((lang) => (
-                <MenuItem
-                  key={lang.code}
-                  className={`${darkMode ? "hover:bg-gray-700" : ""} ${
-                    currentLangCode === lang.code ? "font-bold bg-blue-50 text-blue-500" : ""
-                  }`}
-                  onClick={() => handleLanguageChange(lang.code)}
-                >
-                  {lang.name}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
+          {/* Botón de idioma (pequeño) */}
+          <IconButton
+            variant="text"
+            color="blue-gray"
+            className="transition-colors h-8 w-8"
+            onClick={handleLanguageClick}
+          >
+            <LanguageIcon
+              className={`h-5 w-5 ${darkMode ? "text-white" : "text-blue-gray-500"}`}
+            />
+          </IconButton>
 
           {/* Modo oscuro */}
           <IconButton
             variant="text"
             color="blue-gray"
             onClick={() => setDarkMode(dispatch, !darkMode)}
-            className="transition-colors"
+            className="transition-colors h-8 w-8"
           >
             {darkMode ? (
-              <SunIcon className="h-6 w-6 text-yellow-400" />
+              <SunIcon className="h-5 w-5 text-yellow-400" />
             ) : (
-              <MoonIcon className="h-6 w-6 text-gray-700" />
+              <MoonIcon className="h-5 w-5 text-gray-700" />
             )}
           </IconButton>
 
