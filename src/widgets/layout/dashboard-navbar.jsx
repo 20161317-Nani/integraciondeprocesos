@@ -1,5 +1,5 @@
-import { useLocation, Link, useNavigate  } from "react-router-dom";
-import { useState } from "react"; 
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Navbar,
   Typography,
@@ -11,58 +11,66 @@ import {
   MenuHandler,
   MenuList,
   MenuItem,
-  Avatar,
-  
 } from "@material-tailwind/react";
 import {
   UserCircleIcon,
   Cog6ToothIcon,
-  BellIcon,
-  ClockIcon,
-  CreditCardIcon,
   Bars3Icon,
   MagnifyingGlassIcon,
+  SunIcon,
+  MoonIcon,
+  LanguageIcon,
 } from "@heroicons/react/24/solid";
 import {
   useMaterialTailwindController,
   setOpenConfigurator,
   setOpenSidenav,
+  setDarkMode,
 } from "@/context";
 
-
+// Idiomas disponibles
+const languages = [
+  { code: "es", name: "Español" },
+  { code: "en", name: "English" },
+  { code: "pt", name: "Português" },
+  { code: "zh", name: "中文 (Chino)" },
+  { code: "ja", name: "日本語 (Japonés)" },
+  { code: "fr", name: "Français" },
+];
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
-  const { fixedNavbar, openSidenav } = controller;
+  const { fixedNavbar, openSidenav, darkMode } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
-  // Maneja el cambio en el input de la barra de búsqueda 
-  const handleSearch = (event) => {
-    // Si se presiona la tecla Enter y hay algo escrito
-    if (event.key === 'Enter' && searchTerm.trim() !== '') {
-      navigate(`/dashboard/search?q=${searchTerm}`);
-    }
-  };
-  // Función para ejecutar la búsqueda al hacer clic en el ícono
-   const executeSearch = () => {
-    if (searchTerm.trim() !== '') {
+  const [currentLangCode, setCurrentLangCode] = useState("es");
+
+  const executeSearch = () => {
+    if (searchTerm.trim() !== "") {
       navigate(`/dashboard/search?q=${searchTerm}`);
     }
   };
 
   const handleSearchKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      executeSearch(); // Llama a la función central
-    }
+    if (event.key === "Enter") executeSearch();
   };
+
+  const handleLanguageChange = (code) => {
+    setCurrentLangCode(code);
+    console.log("Idioma seleccionado:", code);
+    // Aquí puedes agregar tu lógica de traducción, ej. i18n.changeLanguage(code)
+  };
+
+  const currentLang = languages.find((lang) => lang.code === currentLangCode);
+  const currentLangDisplay = currentLang ? currentLang.code.toUpperCase() : "ES";
 
   return (
     <Navbar
-      color={fixedNavbar ? "white" : "transparent"}
+      color={fixedNavbar ? (darkMode ? "gray-900" : "white") : "transparent"}
       className={`rounded-xl transition-all ${
         fixedNavbar
           ? "sticky top-4 z-40 py-3 shadow-md shadow-blue-gray-500/5"
@@ -72,6 +80,7 @@ export function DashboardNavbar() {
       blurred={fixedNavbar}
     >
       <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
+        {/* Breadcrumb y título */}
         <div className="capitalize">
           <Breadcrumbs
             className={`bg-transparent p-0 transition-all ${
@@ -87,44 +96,98 @@ export function DashboardNavbar() {
                 {layout}
               </Typography>
             </Link>
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className="font-normal"
-            >
+            <Typography variant="small" color="blue-gray" className="font-normal">
               {page}
             </Typography>
           </Breadcrumbs>
-          <Typography variant="h6" color="blue-gray">
+          <Typography variant="h6" color={darkMode ? "white" : "blue-gray"}>
             {page}
           </Typography>
         </div>
-        <div className="flex items-center">
+
+        {/* Barra de búsqueda y botones */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* 🔍 Barra de búsqueda */}
           <div className="relative mr-auto md:mr-4 md:w-64">
-           <Input  // Barra de búsqueda *input*
-              label="Buscar" 
+            <Input
+              label="Buscar"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleSearchKeyDown}
-              className="pr-10" // Añade padding para que el texto no quede debajo del ícono
+              className="pr-10"
             />
             <IconButton
               size="sm"
               className="!absolute right-1 top-1/2 -translate-y-1/2 rounded"
-              onClick={executeSearch} // Llama a la misma función al hacer clic
+              onClick={executeSearch}
             >
               <MagnifyingGlassIcon className="h-5 w-5" />
             </IconButton>
           </div>
+
+          {/* Menú lateral */}
           <IconButton
             variant="text"
             color="blue-gray"
-            className="grid xl:hidden"
+            className="xl:hidden"
             onClick={() => setOpenSidenav(dispatch, !openSidenav)}
           >
-            <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
+            <Bars3Icon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
           </IconButton>
-           {!token && (
+
+          {/* Botón de idiomas */}
+          <Menu>
+            <MenuHandler>
+              <div className="relative cursor-pointer">
+                <IconButton
+                  variant="text"
+                  color="blue-gray"
+                  className="transition-colors"
+                >
+                  <LanguageIcon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
+                </IconButton>
+                <span
+                  className={`absolute -bottom-1 -right-1 text-[10px] font-bold rounded-full px-1 
+                             ${darkMode ? "bg-white text-gray-900" : "bg-blue-gray-900 text-white"}`}
+                >
+                  {currentLangDisplay}
+                </span>
+              </div>
+            </MenuHandler>
+            <MenuList className={darkMode ? "bg-gray-800 border-gray-700" : ""}>
+              <Typography variant="small" className="p-2 font-bold opacity-70">
+                Seleccionar Idioma
+              </Typography>
+              {languages.map((lang) => (
+                <MenuItem
+                  key={lang.code}
+                  className={`${darkMode ? "hover:bg-gray-700" : ""} ${
+                    currentLangCode === lang.code ? "font-bold bg-blue-50 text-blue-500" : ""
+                  }`}
+                  onClick={() => handleLanguageChange(lang.code)}
+                >
+                  {lang.name}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </Menu>
+
+          {/* Modo oscuro */}
+          <IconButton
+            variant="text"
+            color="blue-gray"
+            onClick={() => setDarkMode(dispatch, !darkMode)}
+            className="transition-colors"
+          >
+            {darkMode ? (
+              <SunIcon className="h-6 w-6 text-yellow-400" />
+            ) : (
+              <MoonIcon className="h-6 w-6 text-gray-700" />
+            )}
+          </IconButton>
+
+          {/* Login si no hay token */}
+          {!token && (
             <Link to="/auth/sign-in">
               <Button
                 variant="text"
@@ -134,93 +197,10 @@ export function DashboardNavbar() {
                 <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
                 Iniciar Sesión
               </Button>
-              <IconButton
-                variant="text"
-                color="blue-gray"
-                className="grid xl:hidden"
-              >
-                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-              </IconButton>
             </Link>
           )}
-          <Menu>
-            <MenuHandler>
-              <IconButton variant="text" color="blue-gray">
-                <BellIcon className="h-5 w-5 text-blue-gray-500" />
-              </IconButton>
-            </MenuHandler>
-            <MenuList className="w-max border-0">
-              <MenuItem className="flex items-center gap-3">
-                <Avatar
-                  src="https://demos.creative-tim.com/material-dashboard/assets/img/team-2.jpg"
-                  alt="item-1"
-                  size="sm"
-                  variant="circular"
-                />
-                <div>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="mb-1 font-normal"
-                  >
-                    <strong>New message</strong> from Laur
-                  </Typography>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="flex items-center gap-1 text-xs font-normal opacity-60"
-                  >
-                    <ClockIcon className="h-3.5 w-3.5" /> 13 minutes ago
-                  </Typography>
-                </div>
-              </MenuItem>
-              <MenuItem className="flex items-center gap-4">
-                <Avatar
-                  src="https://demos.creative-tim.com/material-dashboard/assets/img/small-logos/logo-spotify.svg"
-                  alt="item-1"
-                  size="sm"
-                  variant="circular"
-                />
-                <div>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="mb-1 font-normal"
-                  >
-                    <strong>New album</strong> by Travis Scott
-                  </Typography>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="flex items-center gap-1 text-xs font-normal opacity-60"
-                  >
-                    <ClockIcon className="h-3.5 w-3.5" /> 1 day ago
-                  </Typography>
-                </div>
-              </MenuItem>
-              <MenuItem className="flex items-center gap-4">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-tr from-blue-gray-800 to-blue-gray-900">
-                  <CreditCardIcon className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="mb-1 font-normal"
-                  >
-                    Payment successfully completed
-                  </Typography>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="flex items-center gap-1 text-xs font-normal opacity-60"
-                  > 
-                    <ClockIcon className="h-3.5 w-3.5" /> 2 days ago
-                  </Typography>
-                </div>
-              </MenuItem>
-            </MenuList>
-          </Menu>
+
+          {/* Configuración */}
           <IconButton
             variant="text"
             color="blue-gray"
@@ -233,7 +213,5 @@ export function DashboardNavbar() {
     </Navbar>
   );
 }
-
-DashboardNavbar.displayName = "/src/widgets/layout/dashboard-navbar.jsx";
 
 export default DashboardNavbar;
