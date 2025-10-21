@@ -7,6 +7,10 @@ import {
   IconButton,
   Breadcrumbs,
   Input,
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
 } from "@material-tailwind/react";
 import {
   UserCircleIcon,
@@ -15,8 +19,7 @@ import {
   MagnifyingGlassIcon,
   SunIcon,
   MoonIcon,
-  // 👈 Importamos el ícono del traductor
-  LanguageIcon, 
+  LanguageIcon,
 } from "@heroicons/react/24/solid";
 import {
   useMaterialTailwindController,
@@ -25,8 +28,15 @@ import {
   setDarkMode,
 } from "@/context";
 
-// Definimos los códigos de idioma disponibles
-const languages = ["ES", "EN", "PT", "ZH", "JA", "FR"];
+// Idiomas disponibles
+const languages = [
+  { code: "es", name: "Español" },
+  { code: "en", name: "English" },
+  { code: "pt", name: "Português" },
+  { code: "zh", name: "中文 (Chino)" },
+  { code: "ja", name: "日本語 (Japonés)" },
+  { code: "fr", name: "Français" },
+];
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -37,8 +47,7 @@ export function DashboardNavbar() {
   const [searchTerm, setSearchTerm] = useState("");
   const token = localStorage.getItem("token");
 
-  // 1. Estado para rastrear el idioma actual (inicia en ES = índice 0)
-  const [currentLangIndex, setCurrentLangIndex] = useState(0);
+  const [currentLangCode, setCurrentLangCode] = useState("es");
 
   const executeSearch = () => {
     if (searchTerm.trim() !== "") {
@@ -50,17 +59,14 @@ export function DashboardNavbar() {
     if (event.key === "Enter") executeSearch();
   };
 
-  // 2. Función para cambiar al siguiente idioma en el ciclo
-  const handleTranslateClick = () => {
-    // Calcula el índice del siguiente idioma (cicla de vuelta a 0 después del último)
-    const nextIndex = (currentLangIndex + 1) % languages.length;
-    setCurrentLangIndex(nextIndex);
-
-    // NOTA: Esta es la parte donde integrarías tu librería i18n
-    const nextLang = languages[nextIndex];
-    console.log(`[i18n] Cambiando idioma a: ${nextLang}. Aquí debes llamar a tu función de traducción.`);
-    // Ejemplo i18next: i18n.changeLanguage(nextLang.toLowerCase());
+  const handleLanguageChange = (code) => {
+    setCurrentLangCode(code);
+    console.log("Idioma seleccionado:", code);
+    // Aquí puedes agregar tu lógica de traducción, ej. i18n.changeLanguage(code)
   };
+
+  const currentLang = languages.find((lang) => lang.code === currentLangCode);
+  const currentLangDisplay = currentLang ? currentLang.code.toUpperCase() : "ES";
 
   return (
     <Navbar
@@ -101,7 +107,7 @@ export function DashboardNavbar() {
 
         {/* Barra de búsqueda y botones */}
         <div className="flex items-center gap-2 md:gap-4">
-          {/* Barra de búsqueda */}
+          {/* 🔍 Barra de búsqueda */}
           <div className="relative mr-auto md:mr-4 md:w-64">
             <Input
               label="Buscar"
@@ -129,27 +135,44 @@ export function DashboardNavbar() {
             <Bars3Icon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
           </IconButton>
 
-          {/* 3. Botón Traductor (Nuevo con indicador de idioma) */}
-          <div className="relative">
-            <IconButton
-              variant="text"
-              color="blue-gray"
-              onClick={handleTranslateClick} // 👈 Llama a la función de cambio de idioma
-              className="transition-colors"
-            >
-              <LanguageIcon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
-            </IconButton>
-            
-            {/* Etiqueta para mostrar el código del idioma actual */}
-            <span 
-              className={`absolute -bottom-1 -right-1 text-[10px] font-bold rounded-full px-1 
-                         ${darkMode ? "bg-white text-gray-900" : "bg-blue-gray-900 text-white"}`}
-            >
-              {languages[currentLangIndex]}
-            </span>
-          </div>
-          
-          {/* Botón modo oscuro (Existente) */}
+          {/* Botón de idiomas */}
+          <Menu>
+            <MenuHandler>
+              <div className="relative cursor-pointer">
+                <IconButton
+                  variant="text"
+                  color="blue-gray"
+                  className="transition-colors"
+                >
+                  <LanguageIcon className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-500"}`} />
+                </IconButton>
+                <span
+                  className={`absolute -bottom-1 -right-1 text-[10px] font-bold rounded-full px-1 
+                             ${darkMode ? "bg-white text-gray-900" : "bg-blue-gray-900 text-white"}`}
+                >
+                  {currentLangDisplay}
+                </span>
+              </div>
+            </MenuHandler>
+            <MenuList className={darkMode ? "bg-gray-800 border-gray-700" : ""}>
+              <Typography variant="small" className="p-2 font-bold opacity-70">
+                Seleccionar Idioma
+              </Typography>
+              {languages.map((lang) => (
+                <MenuItem
+                  key={lang.code}
+                  className={`${darkMode ? "hover:bg-gray-700" : ""} ${
+                    currentLangCode === lang.code ? "font-bold bg-blue-50 text-blue-500" : ""
+                  }`}
+                  onClick={() => handleLanguageChange(lang.code)}
+                >
+                  {lang.name}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </Menu>
+
+          {/* Modo oscuro */}
           <IconButton
             variant="text"
             color="blue-gray"

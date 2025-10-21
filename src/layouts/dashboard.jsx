@@ -51,6 +51,11 @@ export function Dashboard() {
           window.location.href = "/auth/sign-in"; // Uso alternativo si 'navigate' no está definido
         }}
       />
+      
+      {/* 🛑 Contenedor del Widget de Google Translate */}
+      {/* Se mantiene fuera del flujo principal, ya que será renderizado por Google */}
+      {/* Puedes mover este div a DashboardNavbar.jsx si quieres que esté allí directamente */}
+      <div id="google_translate_element"></div>
 
 
       {/* Botón desplegable */}
@@ -61,7 +66,7 @@ export function Dashboard() {
         //  Usamos la función handleToggleSidenav
         onClick={handleToggleSidenav} 
       >
-        {/*  Usamos openSidenav para cambiar el ícono */}
+        {/* Usamos openSidenav para cambiar el ícono */}
         {openSidenav ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
       </IconButton>
 

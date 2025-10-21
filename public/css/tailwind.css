@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Evita que el iframe del traductor tape otros elementos */
+.goog-te-menu-frame {
+  z-index: 10 !important;
+}
+
+/* Oculta el banner superior que Google agrega */
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+
+/* Elimina margen del body cuando se oculta el banner */
+body {
+  top: 0px !important;
+}
