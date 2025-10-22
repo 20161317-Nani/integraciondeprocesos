@@ -1,4 +1,7 @@
+// src/widgets/layout/dashboard-navbar.jsx
 import React, { useState, useEffect } from "react";
+import LanguageSelector from "@/components/LanguageSelector";
+import { translateText } from "../../api/translate"; // solo una import
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Navbar,
@@ -16,7 +19,6 @@ import {
   MagnifyingGlassIcon,
   SunIcon,
   MoonIcon,
-  LanguageIcon,
 } from "@heroicons/react/24/solid";
 import {
   useMaterialTailwindController,
@@ -33,7 +35,18 @@ export function DashboardNavbar() {
   const [searchTerm, setSearchTerm] = useState("");
   const token = localStorage.getItem("token");
 
-  // Función para convertir el nombre del path en texto legible
+  const [texts, setTexts] = useState({
+    breadcrumbLayout: "Inicio",
+    breadcrumbPage: "Dashboard",
+    title: "Dashboard",
+    searchLabel: "Buscar",
+    login: "Iniciar Sesión",
+    settings: "Configuración",
+  });
+
+  const [lang, setLang] = useState(localStorage.getItem("lang") || "es"); // idioma guardado
+  const [translating, setTranslating] = useState(false);
+
   const getReadableName = (path) => {
     const names = {
       home: "Inicio",
@@ -42,17 +55,9 @@ export function DashboardNavbar() {
       profile: "Perfil",
       settings: "Configuración",
       search: "Búsqueda",
-      // Agrega aquí más rutas según tu proyecto
     };
     return names[path] || path.charAt(0).toUpperCase() + path.slice(1);
   };
-
-  // Obtenemos layout y página actual
-  const [layout, page] = pathname.split("/").filter((el) => el !== "");
-
-  // Traducción automática de nombres
-  const translatedLayout = getReadableName(layout);
-  const translatedPage = getReadableName(page);
 
   const executeSearch = () => {
     if (searchTerm.trim() !== "") {
@@ -64,15 +69,41 @@ export function DashboardNavbar() {
     if (event.key === "Enter") executeSearch();
   };
 
-  const handleLanguageClick = () => {
-    const select = document.querySelector(".goog-te-combo");
-    if (select) select.dispatchEvent(new Event("change"));
-  };
-
-  // cambia el fondo global del body según modo oscuro
   useEffect(() => {
     document.body.classList.toggle("dark-mode", darkMode);
   }, [darkMode]);
+
+  // Traduce todos los textos y guarda el idioma
+  const handleTranslate = async (newLang) => {
+    setLang(newLang);
+    localStorage.setItem("lang", newLang);
+    setTranslating(true);
+    try {
+      const pathParts = pathname.split("/").filter((el) => el !== "");
+      const layout = getReadableName(pathParts[0] || "home");
+      const page = getReadableName(pathParts[1] || "Dashboard");
+
+      const newTexts = {
+        breadcrumbLayout: (await translateText(layout, "es", newLang)).translatedText,
+        breadcrumbPage: (await translateText(page, "es", newLang)).translatedText,
+        title: (await translateText(page, "es", newLang)).translatedText,
+        searchLabel: (await translateText("Buscar", "es", newLang)).translatedText,
+        login: (await translateText("Iniciar Sesión", "es", newLang)).translatedText,
+        settings: (await translateText("Configuración", "es", newLang)).translatedText,
+      };
+
+      setTexts(newTexts);
+    } catch (err) {
+      console.error("Error traduciendo textos:", err);
+    } finally {
+      setTranslating(false);
+    }
+  };
+
+  // Traducir automáticamente al montar el componente
+  useEffect(() => {
+    handleTranslate(lang);
+  }, [pathname]);
 
   return (
     <Navbar
@@ -86,10 +117,8 @@ export function DashboardNavbar() {
       blurred={fixedNavbar}
     >
       <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
-        
         {/* Breadcrumb y título */}
         <div className="capitalize flex items-center gap-3">
-          {/* 🔹 Botón menú lateral */}
           <IconButton
             variant="text"
             color="blue-gray"
@@ -98,27 +127,18 @@ export function DashboardNavbar() {
           >
             {openSidenav ? (
               <XMarkIcon
-                className={`h-6 w-6 ${
-                  darkMode ? "text-white" : "text-blue-gray-700"
-                }`}
+                className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-700"}`}
               />
             ) : (
               <Bars3Icon
-                className={`h-6 w-6 ${
-                  darkMode ? "text-white" : "text-blue-gray-700"
-                }`}
+                className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-700"}`}
               />
             )}
           </IconButton>
 
           <div>
-            {/* Breadcrumb dinámico */}
-            <Breadcrumbs
-              className={`bg-transparent p-0 transition-all ${
-                fixedNavbar ? "mt-1" : ""
-              }`}
-            >
-              <Link to={`/${layout}`}>
+            <Breadcrumbs className="bg-transparent p-0 transition-all">
+              <Link to={`/${pathname.split("/")[1] || ""}`}>
                 <Typography
                   variant="small"
                   className={`font-normal transition-all hover:text-blue-500 ${
@@ -127,35 +147,31 @@ export function DashboardNavbar() {
                       : "text-blue-gray-500 hover:text-blue-700"
                   }`}
                 >
-                  {translatedLayout || "Dashboard"}
+                  {texts.breadcrumbLayout}
                 </Typography>
               </Link>
               <Typography
                 variant="small"
-                className={`font-normal ${
-                  darkMode ? "text-gray-200" : "text-blue-gray-700"
-                }`}
+                className={`font-normal ${darkMode ? "text-gray-200" : "text-blue-gray-700"}`}
               >
-                {translatedPage || "Inicio"}
+                {texts.breadcrumbPage}
               </Typography>
             </Breadcrumbs>
 
-            {/* Título dinámico */}
             <Typography
               variant="h6"
               className={`${darkMode ? "text-white" : "text-blue-gray-900"}`}
             >
-              {translatedPage || "Inicio"}
+              {texts.title}
             </Typography>
           </div>
         </div>
 
         {/* Barra de búsqueda y botones */}
         <div className="flex items-center gap-2 md:gap-4">
-          {/* Barra de búsqueda */}
           <div className="relative mr-auto md:mr-4 md:w-64">
             <Input
-              label="Buscar"
+              label={texts.searchLabel}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleSearchKeyDown}
@@ -170,7 +186,8 @@ export function DashboardNavbar() {
             </IconButton>
           </div>
 
-          {/* Modo oscuro */}
+          <LanguageSelector handleTranslate={handleTranslate} />
+
           <IconButton
             variant="text"
             color="blue-gray"
@@ -184,7 +201,6 @@ export function DashboardNavbar() {
             )}
           </IconButton>
 
-          {/* Login si no hay token */}
           {!token && (
             <Link to="/auth/sign-in">
               <Button
@@ -193,21 +209,18 @@ export function DashboardNavbar() {
                 className="hidden items-center gap-1 px-4 xl:flex normal-case"
               >
                 <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                Iniciar Sesión
+                {texts.login}
               </Button>
             </Link>
           )}
 
-          {/* Configuración */}
           <IconButton
             variant="text"
             color="blue-gray"
             onClick={() => setOpenConfigurator(dispatch, true)}
           >
             <Cog6ToothIcon
-              className={`h-5 w-5 ${
-                darkMode ? "text-white" : "text-blue-gray-500"
-              }`}
+              className={`h-5 w-5 ${darkMode ? "text-white" : "text-blue-gray-500"}`}
             />
           </IconButton>
         </div>
