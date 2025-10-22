@@ -33,7 +33,7 @@ export function DashboardNavbar() {
   const [searchTerm, setSearchTerm] = useState("");
   const token = localStorage.getItem("token");
 
-  // 🔹 Función para convertir el nombre del path en texto legible
+  // Función para convertir el nombre del path en texto legible
   const getReadableName = (path) => {
     const names = {
       home: "Inicio",
@@ -69,7 +69,7 @@ export function DashboardNavbar() {
     if (select) select.dispatchEvent(new Event("change"));
   };
 
-  // 💡 cambia el fondo global del body según modo oscuro
+  // cambia el fondo global del body según modo oscuro
   useEffect(() => {
     document.body.classList.toggle("dark-mode", darkMode);
   }, [darkMode]);
@@ -112,7 +112,7 @@ export function DashboardNavbar() {
           </IconButton>
 
           <div>
-            {/* 🔸 Breadcrumb dinámico */}
+            {/* Breadcrumb dinámico */}
             <Breadcrumbs
               className={`bg-transparent p-0 transition-all ${
                 fixedNavbar ? "mt-1" : ""
@@ -140,7 +140,7 @@ export function DashboardNavbar() {
               </Typography>
             </Breadcrumbs>
 
-            {/* 🔹 Título dinámico */}
+            {/* Título dinámico */}
             <Typography
               variant="h6"
               className={`${darkMode ? "text-white" : "text-blue-gray-900"}`}
@@ -152,7 +152,7 @@ export function DashboardNavbar() {
 
         {/* Barra de búsqueda y botones */}
         <div className="flex items-center gap-2 md:gap-4">
-          {/* 🔍 Barra de búsqueda */}
+          {/* Barra de búsqueda */}
           <div className="relative mr-auto md:mr-4 md:w-64">
             <Input
               label="Buscar"
@@ -170,21 +170,7 @@ export function DashboardNavbar() {
             </IconButton>
           </div>
 
-          {/* 🌐 Botón idioma */}
-          <IconButton
-            variant="text"
-            color="blue-gray"
-            className="transition-colors h-8 w-8"
-            onClick={handleLanguageClick}
-          >
-            <LanguageIcon
-              className={`h-5 w-5 ${
-                darkMode ? "text-white" : "text-blue-gray-500"
-              }`}
-            />
-          </IconButton>
-
-          {/* 🌗 Modo oscuro */}
+          {/* Modo oscuro */}
           <IconButton
             variant="text"
             color="blue-gray"
@@ -198,7 +184,7 @@ export function DashboardNavbar() {
             )}
           </IconButton>
 
-          {/* 👤 Login si no hay token */}
+          {/* Login si no hay token */}
           {!token && (
             <Link to="/auth/sign-in">
               <Button
@@ -212,7 +198,7 @@ export function DashboardNavbar() {
             </Link>
           )}
 
-          {/* ⚙️ Configuración */}
+          {/* Configuración */}
           <IconButton
             variant="text"
             color="blue-gray"
