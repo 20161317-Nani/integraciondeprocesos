@@ -65,14 +65,17 @@ export function DashboardNavbar() {
   }, [darkMode]);
 
   // --------------------------
-  // GOOGLE TRANSLATE SCRIPT (solo una vez, evita duplicados)
+  // GOOGLE TRANSLATE SCRIPT (Inicialización y Forzado de Texto "Idioma")
   // --------------------------
   useEffect(() => {
     if (document.getElementById("google-translate-script")) return;
 
     window.googleTranslateElementInit = () => {
       const container = document.getElementById("google_translate_element");
-      if (container) container.innerHTML = ""; // evita duplicados
+      if (container) {
+          // FUERZA el texto inicial a "Idioma" antes de que Google lo reemplace.
+          container.innerHTML = 'Idioma'; 
+      }
 
       new window.google.translate.TranslateElement(
         {
@@ -94,7 +97,7 @@ export function DashboardNavbar() {
   }, []);
 
   // --------------------------
-  // ESTILOS PERSONALIZADOS para Google Translate
+  // ESTILOS PERSONALIZADOS para Google Translate (Incluye orden invertido)
   // --------------------------
   useEffect(() => {
     const style = document.createElement("style");
@@ -109,12 +112,18 @@ export function DashboardNavbar() {
         height: 32px;
         overflow: hidden;
         border: 1px solid ${darkMode ? "#374151" : "#ddd"};
+        color: ${darkMode ? "#f3f4f6" : "#333"} !important; 
+        font-weight: 500 !important;
       }
       .goog-te-gadget {
         font-family: 'Inter', sans-serif !important;
         display: flex !important;
         align-items: center;
         gap: 4px;
+        font-size: 1rem !important; 
+        
+        /* CAMBIO CLAVE: Invierte el orden para poner el logo a la izquierda */
+        flex-direction: row-reverse;
       }
       .goog-te-gadget-icon {
         height: 18px !important;
@@ -133,19 +142,33 @@ export function DashboardNavbar() {
         font-weight: 500 !important;
         display: flex;
         align-items: center;
+        
+        /* Pequeño margen para separar el texto del logo */
+        margin-right: 4px; 
       }
+      
+      /* Oculta el texto por defecto de Google Translate (ej: 'Español') */
+      .goog-te-menu-value > span:not(:last-child) {
+          display: none !important;
+      }
+
       .goog-te-menu-value span {
         display: inline-flex !important;
         align-items: center !important;
       }
+      
       .goog-te-menu-value > span:after {
         content: "▼";
         font-size: 10px;
         margin-left: 6px;
         color: ${darkMode ? "#9ca3af" : "#666"};
       }
+      
+      /* Ajusta el margen del icono de la bandera para que quede a la izquierda */
       .goog-te-gadget span:first-child img {
-        margin-right: 4px;
+        margin-right: 0px !important; /* Quita el margen a la derecha del logo */
+        margin-left: 4px !important; /* Añade margen a la izquierda para separarlo del texto */
+        display: inline-block !important; 
       }
     `;
     document.head.appendChild(style);
