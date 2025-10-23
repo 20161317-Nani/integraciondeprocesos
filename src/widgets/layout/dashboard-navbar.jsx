@@ -65,16 +65,19 @@ export function DashboardNavbar() {
   }, [darkMode]);
 
   // --------------------------
-  // GOOGLE TRANSLATE SCRIPT (solo una vez, incluye Español)
+  // GOOGLE TRANSLATE SCRIPT (solo una vez, evita duplicados)
   // --------------------------
   useEffect(() => {
     if (document.getElementById("google-translate-script")) return;
 
     window.googleTranslateElementInit = () => {
+      const container = document.getElementById("google_translate_element");
+      if (container) container.innerHTML = ""; // evita duplicados
+
       new window.google.translate.TranslateElement(
         {
           pageLanguage: "es",
-          includedLanguages: "es,en,fr,pt,ja,zh-CN", // Agregamos "es" para que aparezca
+          includedLanguages: "es,en,fr,pt,ja,zh-CN",
           layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
           autoDisplay: false,
         },
@@ -89,6 +92,65 @@ export function DashboardNavbar() {
     script.async = true;
     document.body.appendChild(script);
   }, []);
+
+  // --------------------------
+  // ESTILOS PERSONALIZADOS para Google Translate
+  // --------------------------
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      #google_translate_element {
+        display: inline-flex;
+        align-items: center;
+        background: ${darkMode ? "#1f2937" : "#f5f5f5"};
+        border-radius: 8px;
+        padding: 2px 8px;
+        font-size: 14px;
+        height: 32px;
+        overflow: hidden;
+        border: 1px solid ${darkMode ? "#374151" : "#ddd"};
+      }
+      .goog-te-gadget {
+        font-family: 'Inter', sans-serif !important;
+        display: flex !important;
+        align-items: center;
+        gap: 4px;
+      }
+      .goog-te-gadget-icon {
+        height: 18px !important;
+        width: 18px !important;
+        vertical-align: middle !important;
+      }
+      .goog-te-gadget-simple {
+        background-color: transparent !important;
+        border: none !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+      }
+      .goog-te-menu-value {
+        color: ${darkMode ? "#f3f4f6" : "#333"} !important;
+        font-weight: 500 !important;
+        display: flex;
+        align-items: center;
+      }
+      .goog-te-menu-value span {
+        display: inline-flex !important;
+        align-items: center !important;
+      }
+      .goog-te-menu-value > span:after {
+        content: "▼";
+        font-size: 10px;
+        margin-left: 6px;
+        color: ${darkMode ? "#9ca3af" : "#666"};
+      }
+      .goog-te-gadget span:first-child img {
+        margin-right: 4px;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, [darkMode]);
 
   return (
     <Navbar
@@ -145,7 +207,9 @@ export function DashboardNavbar() {
               </Link>
               <Typography
                 variant="small"
-                className={`${darkMode ? "text-gray-200" : "text-blue-gray-700"}`}
+                className={`${
+                  darkMode ? "text-gray-200" : "text-blue-gray-700"
+                }`}
               >
                 {translatedPage}
               </Typography>

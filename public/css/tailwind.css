@@ -1,3 +1,60 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Google Translate Custom Style */
+#google_translate_element {
+  display: inline-flex;
+  align-items: center;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 14px;
+  height: 32px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.goog-te-gadget {
+  font-family: 'Inter', sans-serif !important;
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
+}
+
+.goog-te-gadget-icon {
+  height: 18px !important;
+  width: 18px !important;
+  vertical-align: middle !important;
+}
+
+.goog-te-gadget-simple {
+  background-color: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.goog-te-menu-value {
+  color: #333 !important;
+  font-weight: 500 !important;
+  display: flex;
+  align-items: center;
+}
+
+.goog-te-menu-value span {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.goog-te-menu-value > span:after {
+  content: "▼";
+  font-size: 10px;
+  margin-left: 6px;
+  color: #666;
+}
+
+/* Oculta el ícono duplicado */
+.goog-te-gadget span:first-child img {
+  margin-right: 4px;
+}
