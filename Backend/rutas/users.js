@@ -2,6 +2,95 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth'); // Importamos el guardia de seguridad
 const User = require('../models/usuarios');
+const axios = require('axios'); // Para geocodificación inversa
+const { upload } = require('../config/cloudinaryConfig'); // Importa la config de subida
+
+// --- RUTA PARA SUBIR FOTO DE PERFIL ---
+// @ruta    PUT /api/users/profile-picture/upload
+// @desc    Subir una nueva foto de perfil
+// @acceso  Privado
+router.put('/profile-picture/upload', auth, upload.single('profilePic'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No se subió ningún archivo.' });
+    }
+    
+    // req.file.path contiene la URL de la imagen en Cloudinary
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { profilePictureUrl: req.file.path },
+      { new: true }
+    ).select('profilePictureUrl');
+
+    res.json({ profilePictureUrl: updatedUser.profilePictureUrl });
+
+  } catch (error) {
+    console.error('Error al subir foto:', error);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
+
+// --- RUTA PARA ACTUALIZAR DATOS DEL PERFIL (Nombre, Apellido, Teléfono) ---
+// @ruta    PUT /api/users/profile
+// @desc    Actualizar nombre, apellido, teléfono
+// @acceso  Privado
+router.put('/profile', auth, async (req, res) => {
+    try {
+        const { nombre, apellido, telefono } = req.body;
+        const fieldsToUpdate = {};
+        if (nombre) fieldsToUpdate.nombre = nombre;
+        if (apellido) fieldsToUpdate.apellido = apellido;
+        if (telefono) fieldsToUpdate.telefono = telefono; // Asume que tienes 'telefono' en tu Schema
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user.id,
+            { $set: fieldsToUpdate },
+            { new: true }
+        ).select('nombre apellido telefono'); // Devuelve los campos actualizados
+
+        res.json(updatedUser);
+    } catch (error) {
+        console.error('Error al actualizar perfil:', error);
+        res.status(500).send('Error en el servidor');
+    }
+
+});
+// --- RUTA PARA OBTENER EL PERFIL COMPLETO (Incluye país derivado) ---
+// @ruta    GET /api/users/profile
+// @desc    Obtener datos del perfil del usuario logueado
+// @acceso  Privado
+router.get('/profile', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        let country = 'Desconocido';
+        // Intenta obtener el país si hay coordenadas válidas
+        if (user.location && user.location.coordinates && user.location.coordinates[0] !== 0) {
+            try {
+                const [lon, lat] = user.location.coordinates;
+                const geoResponse = await axios.get('https://api.opencagedata.com/geocode/v1/json', {
+                    params: { q: `${lat}+${lon}`, key: process.env.OPENCAGE_API_KEY },
+                });
+                country = geoResponse.data.results[0]?.components.country || 'Desconocido';
+            } catch (geoError) {
+                console.error("Error de geocodificación:", geoError.message);
+            }
+        }
+        
+        // Convierte a objeto simple para añadir el país
+        const userProfile = user.toObject(); 
+        userProfile.country = country; // Añade el país
+
+        res.json(userProfile);
+    } catch (error) {
+        console.error('Error al obtener perfil:', error);
+        res.status(500).send('Error en el servidor');
+    }
+});
 
 // @ruta    PUT /api/users/location
 // @desc    Actualizar la ubicación del usuario logueado
@@ -199,6 +288,7 @@ router.get('/saved', auth, async (req, res) => {
     res.status(500).send('Error en el servidor');
   }
 });
+
 
 
 module.exports = router;

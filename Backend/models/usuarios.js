@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
   apellido: { type: String, required: true },
   correo: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  telefono: { type: String },
   date: { type: Date, default: Date.now },
   location: {
     type: {
@@ -31,6 +32,11 @@ const UserSchema = new mongoose.Schema({
     default: [],
   },
 
+  profilePictureUrl: {
+    type: String,
+    default: '/img/default-avatar.png' // Una URL de avatar por defecto
+  },
+
   // Campos para recuperar la contraseña
   resetPasswordToken: String,
   resetPasswordExpire: Date,
@@ -40,13 +46,3 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.index({ location: '2dsphere' });
 module.exports = mongoose.model('usuario', UserSchema);
-
-
-
-
-
-
-
-
-
-

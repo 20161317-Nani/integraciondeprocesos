@@ -1,61 +1,148 @@
 import {
-  Card,
-  CardBody,
-  CardHeader,
-  CardFooter,
-  Avatar,
-  Typography,
-  Tabs,
-  TabsHeader,
-  Tab,
-  Switch,
-  Tooltip,
-  Button,
-} from "@material-tailwind/react";
+  Card,  CardBody,  CardHeader,  CardFooter,  Avatar,  Typography,  Tabs,  TabsHeader,
+  Tab,  Switch,  Tooltip,  Spinner,  Button, Input, IconButton, Dialog,   DialogHeader,  DialogBody,  DialogFooter,} from "@material-tailwind/react";
 import {
-  HomeIcon,
-  ChatBubbleLeftEllipsisIcon,
-  Cog6ToothIcon,
-  PencilIcon,
-} from "@heroicons/react/24/solid";
-import { Link } from "react-router-dom";
-import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
-import { platformSettingsData, conversationsData, projectsData } from "@/data";
-import { useEffect, useState } from 'react';
+  HomeIcon,  ChatBubbleLeftEllipsisIcon,  Cog6ToothIcon,  PencilIcon, CameraIcon } from "@heroicons/react/24/solid";
+import { useEffect, useState, useRef } from 'react';
 import ProtectedContent from '@/components/ProtectedContent'; // Importa el contenido protegido
+
 
 export function Profile() {
 
   const [userProfile, setUserProfile] = useState(null);
+  const fileInputRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true); 
+  const [newProfilePicUrl, setNewProfilePicUrl] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    nombre: '',
+    apellido: '',
+    telefono: '',
+   
+  });
 
   useEffect(() => {
-    // Esta función solo se llamará si el usuario está autenticado,
-    // porque el componente que la llama está dentro de <ProtectedContent>
     const fetchProfile = async () => {
+      setIsLoading(true);
       const token = localStorage.getItem('token');
-      if (!token) return; // Si por alguna razón no hay token, no hacer nada
-
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
       try {
-        const response = await fetch('/api/auth/me', {
-          headers: { 'x-auth-token': token },
-        });
-        if (!response.ok) throw new Error('Error al obtener datos');
-        
+        const response = await fetch('/api/users/profile', { headers: { 'x-auth-token': token } });
+        if (!response.ok) throw new Error('Error al obtener perfil');
         const data = await response.json();
         setUserProfile(data);
+        // Inicializa el formulario de edición con los datos cargados
+        setEditFormData({
+          nombre: data.nombre || '',
+          apellido: data.apellido || '',
+          telefono: data.telefono || '', // Asume que 'telefono' puede no estar
+        });
       } catch (error) {
-        console.error(error);
+        console.error("Error en fetchProfile:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
-
     fetchProfile();
   }, []);
 
-  // Función para cerrar sesión
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    setIsUploading(true);
+    setUpdateMessage('');
+    const formData = new FormData();
+    formData.append('profilePic', file);
+
+    try {
+      const response = await fetch('/api/users/profile-picture/upload', {
+        method: 'PUT',
+        headers: { 'x-auth-token': token },
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Error al subir la foto');
+      
+      const data = await response.json();
+      const newImageUrl = `${data.profilePictureUrl}?t=${new Date().getTime()}`; // Truco de caché
+
+      setUserProfile(prev => ({ ...prev, profilePictureUrl: newImageUrl }));
+      setUpdateMessage('Foto actualizada!');
+    } catch (error) {
+      console.error(error);
+      setUpdateMessage(`Error al subir la foto.`);
+    } finally {
+      setIsUploading(false);
+      setTimeout(() => setUpdateMessage(''), 3000);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
+
+  // --- NUEVA LÓGICA PARA EL MODAL ---
+  const handleModalOpen = () => {
+    // Reinicia el formulario con los datos actuales cada vez que se abre
+    if (userProfile) {
+      setEditFormData({
+        nombre: userProfile.nombre || '',
+        apellido: userProfile.apellido || '',
+        telefono: userProfile.telefono || '', // Asume que 'telefono' está en tu Schema
+      });
+    }
+    setIsEditModalOpen(true);
+  };
+
+  const handleModalClose = () => setIsEditModalOpen(false);
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleProfileUpdate = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const response = await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify(editFormData),
+      });
+      if (!response.ok) throw new Error('Error al actualizar');
+      
+      const data = await response.json();
+      // Actualiza el perfil principal con los nuevos datos
+      setUserProfile(prev => ({ ...prev, ...data }));
+      handleModalClose(); // Cierra el modal
+    } catch (error) {
+      console.error("Error al actualizar perfil:", error);
+    }
+  };
+
   const handleLogout = () => {
-  localStorage.removeItem('token');
-  window.location.href = '/auth/sign-in';
-};
+    localStorage.removeItem('token');
+    window.location.href = '/auth/sign-in';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spinner className="h-12 w-12" />
+      </div>
+    );
+  }
 
   return (
       // Todo se envuelve en protectedcontent para saber si el usuaio esta logeado o no
@@ -75,14 +162,33 @@ export function Profile() {
         <CardBody className="p-4">
           <div className="mb-10 flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-6">
-              <Avatar
-                src="/img/bruce-mars.jpeg"
-                alt="user-avatar"
-                size="xl"
-                variant="rounded"
-                className="rounded-lg shadow-lg shadow-blue-gray-500/40"
-              />
-               {/* --- DATOS DINÁMICOS --- */}
+              {/* CAMBIOS DE TAMAÑO Y POSICIÓN DEL AVATAR */}
+              <div className="relative group w-fit"> 
+                    <Avatar
+                      src={userProfile.profilePictureUrl || '/img/default-avatar.png'}
+                      alt="user-avatar"
+                      size="xxl"
+                      variant="rounded"
+                      className="rounded-lg shadow-lg shadow-blue-gray-500/40"
+                    />
+                    {/* Botón flotante para cambiar foto */}
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/*" // Acepta solo imágenes
+                      className="hidden" // Oculta el input real
+                    />
+                    <IconButton
+                      size="sm"
+                      color="white"
+                      className="!absolute bottom-1 right-1 rounded-full border border-blue-gray-200 group-hover:opacity-100 opacity-0 transition-opacity" 
+                      onClick={triggerFileInput}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? <Spinner className="h-4 w-4"/> : <CameraIcon className="h-4 w-4 text-blue-gray-700"/>}
+                    </IconButton>
+                  </div>
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
                   {userProfile.nombre} {userProfile.apellido}
@@ -91,7 +197,9 @@ export function Profile() {
                   {userProfile.correo}
                 </Typography>
               </div>
+            
             </div>
+            {updateMessage && <Typography color="blue-gray" className="text-sm mb-4 px-4">{updateMessage}</Typography>}
           </div>
 
           <div className="grid grid-cols-1 gap-8 px-4 lg:grid-cols-2">
@@ -112,7 +220,7 @@ export function Profile() {
                     Teléfono
                   </Typography>
                   <Typography variant="paragraph" className="text-blue-gray-800">
-                    (44) 123 1234 123
+                    {userProfile.telefono || 'No especificado'}
                   </Typography>
                 </div>
 
@@ -121,16 +229,16 @@ export function Profile() {
                     Ubicación
                   </Typography>
                   <Typography variant="paragraph" className="text-blue-gray-800">
-                    USA
+                    {userProfile.country || 'No especificada'}
                   </Typography>
                 </div>
               </div>
 
-              <Button variant="outlined" className="flex items-center gap-2">
-                <PencilIcon className="h-4 w-4" />
-                Editar Perfil
-              </Button>
-            </div>
+              <Button variant="outlined" className="flex items-center gap-2" onClick={handleModalOpen}>
+                    <PencilIcon className="h-4 w-4" />
+                    Editar Perfil
+                  </Button>
+                </div>
 
             {/* Recuperación de Contraseña */}
             <div className="space-y-6">
@@ -188,6 +296,40 @@ export function Profile() {
           </div>
         </CardBody>
       </Card>
+
+      {/* --- 7. MODAL PARA EDITAR PERFIL --- */}
+          <Dialog open={isEditModalOpen} handler={handleModalClose}>
+            <DialogHeader>Editar Información Personal</DialogHeader>
+            <DialogBody divider className="flex flex-col gap-4">
+              <Input 
+                label="Nombre"
+                name="nombre"
+                value={editFormData.nombre}
+                onChange={handleFormChange}
+              />
+              <Input 
+                label="Apellido" 
+                name="apellido"
+                value={editFormData.apellido}
+                onChange={handleFormChange}
+              />
+              <Input 
+                label="Teléfono" 
+                name="telefono"
+                value={editFormData.telefono}
+                onChange={handleFormChange}
+              />
+            </DialogBody>
+            <DialogFooter>
+              <Button variant="text" color="red" onClick={handleModalClose} className="mr-1">
+                <span>Cancelar</span>
+              </Button>
+              <Button variant="gradient" color="green" onClick={handleProfileUpdate}>
+                <span>Guardar Cambios</span>
+              </Button>
+            </DialogFooter>
+          </Dialog>            
+
     </>
       )} </ProtectedContent>
 
