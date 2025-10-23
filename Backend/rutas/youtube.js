@@ -260,4 +260,49 @@ router.get('/combined-search', async (req, res) => {
   }
 });
 
+// --- AÑADE ESTA NUEVA RUTA ---
+// @ruta    GET /api/youtube/location-query-search
+// @desc    Buscar videos con un query (q) y una ubicación (lat/lon)
+// @acceso  Público
+router.get('/location-query-search', async (req, res) => {
+  try {
+    const { q, lat, lon } = req.query; // Obtiene los 3 parámetros
+
+    if (!q || !lat || !lon) {
+      return res.status(400).json({ message: 'Se requieren término de búsqueda y coordenadas.' });
+    }
+
+    const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
+    
+    const response = await axios.get(YOUTUBE_SEARCH_URL, {
+      params: {
+        part: 'snippet',
+        q: q,                       // El término a buscar (ej. "platillos típicos")
+        location: `${lat},${lon}`,  // Las coordenadas del mapa
+        locationRadius: '50km',     // Un radio de 50km
+        type: 'video',
+        maxResults: 12,
+        key: process.env.YOUTUBE_API_KEY,
+      },
+    });
+
+    // Mapeamos la respuesta (igual que en la ruta /search)
+    const videos = response.data.items.map(item => ({
+      id: item.id.videoId,
+      thumbnailUrl: item.snippet.thumbnails.medium.url,
+      title: item.snippet.title,
+      channelName: item.snippet.channelTitle,
+      channelAvatarUrl: `https://picsum.photos/48?random=${item.id.videoId}`,
+      publishedAt: new Date(item.snippet.publishedAt).toLocaleDateString('es-MX'),
+      views: 'N/A',
+    }));
+
+    res.json(videos);
+
+  } catch (error) {
+    console.error('Error en la búsqueda por ubicación y query:', error.message);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
 module.exports = router;

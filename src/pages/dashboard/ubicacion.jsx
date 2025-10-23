@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { Typography, Button, Card, CardBody } from "@material-tailwind/react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { Typography, Button, Card, CardBody, Input, IconButton} from "@material-tailwind/react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { VideoCard } from "@/widgets/cards";
 import ProtectedContent from '@/components/ProtectedContent';
@@ -50,6 +51,8 @@ export function Ubicacion() {
   const [suggestedVideos, setSuggestedVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [displayMode, setDisplayMode] = useState("sugeridos");
 
   // 1. Obtiene la ubicación inicial del navegador al cargar la página
  useEffect(() => {
@@ -62,7 +65,7 @@ export function Ubicacion() {
       
       try {
         // 1. Intenta obtener el perfil del usuario desde la BD
-        const profileResponse = await fetch('/api/auth/me', {
+        const profileResponse = await fetch('/api/users/profile', {
           headers: { 'x-auth-token': token },
         });
         const profileData = await profileResponse.json();
@@ -95,22 +98,46 @@ export function Ubicacion() {
     getInitialLocation();
   }, []); // Se ejecuta solo una vez al cargar
 
-  // 2. Carga los videos cercanos cada vez que la posición cambia
-  useEffect(() => {
-    if (currentPosition) {
-      const fetchVideosByLocation = async () => {
-        try {
-          const response = await fetch(`/api/youtube/combined-search?lat=${currentPosition.lat}&lon=${currentPosition.lng}`);
-          const data = await response.json();
-          setSuggestedVideos(data);
-        } catch (error) {
-          console.error("Error al cargar videos por ubicación:", error);
-          setMessage("No se pudieron cargar los videos.");
-        }
-      };
-      fetchVideosByLocation();
+  // 2. Carga videos sugeridos o de búsqueda cuando cambia la posición o el término de búsqueda
+  const fetchVideosForCurrentLocation = useCallback(async (position, currentSearchTerm) => {
+    if (!position) return;
+    setIsLoading(true);
+    setMessage('');
+    
+    try {
+      const { lat, lng } = position;
+      let response;
+
+      if (currentSearchTerm.trim() !== "") {
+        // A. Si hay un término de búsqueda, refresca la búsqueda
+        console.log(`Refrescando búsqueda de "${currentSearchTerm}" en [${lat}, ${lng}]`);
+        response = await fetch(`/api/youtube/location-query-search?q=${currentSearchTerm}&lat=${lat}&lon=${lng}`);
+        setDisplayMode(`"${currentSearchTerm}"`);
+      } else {
+        // B. Si no hay término de búsqueda, trae sugerencias
+        console.log(`Cargando sugerencias en [${lat}, ${lng}]`);
+        response = await fetch(`/api/youtube/combined-search?lat=${lat}&lon=${lng}`);
+        setDisplayMode("sugeridos");
+      }
+
+      if (!response.ok) throw new Error("No se pudieron cargar los videos.");
+      const data = await response.json();
+      setSuggestedVideos(data);
+
+    } catch (error) {
+      console.error("Error al cargar videos por ubicación:", error);
+      setMessage("No se pudieron cargar los videos para esta área.");
+    } finally {
+      setIsLoading(false);
     }
-  }, [currentPosition]);
+  }, []); // Depende de 'useCallback', no de estados
+
+  // 3. useEffect para cargar videos cuando cambia la posición o el término de búsqueda
+  useEffect(() => {
+    // Cuando la posición cambia, vuelve a cargar los videos
+    // leyendo el estado 'searchTerm' actual.
+    fetchVideosForCurrentLocation(currentPosition, searchTerm);
+  }, [currentPosition, fetchVideosForCurrentLocation]); // Depende de la posición
 
   // 3. Guarda la ubicación en la base de datos
   const handleSaveLocation = async () => {
@@ -142,6 +169,10 @@ export function Ubicacion() {
         setMessage('Error al guardar la ubicación.');
     }
 };
+// 4. Maneja la búsqueda por ubicación y término
+const handleLocationQuerySearch = async () => {
+    fetchVideosForCurrentLocation(currentPosition, searchTerm);
+  };
 
 return (
   <div className="mt-12">
@@ -170,22 +201,51 @@ return (
           <Button onClick={handleSaveLocation} color="blue">Confirmar Ubicación</Button>
           {message && <Typography color="blue-gray" className="text-center mt-2">{message}</Typography>}
         </div>
+            {/* --- SECCIÓN BÚSQUEDA --- */}
+         <div className="relative w-full max-w-md">
+                <Input
+                  label="Buscar en esta área..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLocationQuerySearch()}
+                  className="pr-10"
+                />
+                <IconButton
+                  size="sm"
+                  className="!absolute right-1 top-1/2 -translate-y-1/2 rounded"
+                  onClick={handleLocationQuerySearch}
+                >
+                  <MagnifyingGlassIcon className="h-5 w-5" />
+                </IconButton>
+              </div>
 
-        {/* --- SECCIÓN INFERIOR: VIDEOS SUGERIDOS --- */}
-        <div className="w-full flex flex-col gap-4"> 
-          <Typography variant="h5">Sugerencias Cercanas</Typography>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {suggestedVideos.length > 0 ? (
-                suggestedVideos.map((video) => (
-                    <VideoCard key={video.id} video={video} />
-                ))
+        {/* --- SECCIÓN INFERIOR: VIDEOS--- */}
+          <div className="w-full flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <Typography variant="h5">
+                {displayMode === "sugeridos" ? "Sugerencias Cercanas" : `Resultados para: ${displayMode}`}
+              </Typography>
+            </div>
+
+            {/* --- CUADRÍCULA DE VIDEOS --- */}
+            {isLoading ? (
+                <Typography>Cargando...</Typography>
             ) : (
-                <Typography>No hay videos sugeridos para esta ubicación.</Typography>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {suggestedVideos.length > 0 ? (
+                    suggestedVideos.map((video) => (
+                        <VideoCard key={video.id} video={video} />
+                    ))
+                ) : (
+                    <Typography className="col-span-full text-center">
+                        No se encontraron videos.
+                    </Typography>
+                )}
+                </div>
             )}
           </div>
-        </div>
 
-      </div>
+        </div>
     </ProtectedContent>
   </div>
 );
