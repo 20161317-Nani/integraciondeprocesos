@@ -15,7 +15,6 @@ app.get('/', (req, res) => res.send('API funcionando!'));
 // --- DEFINIR RUTAS ---
 app.use('/api/auth', require('./rutas/auth')); // <-- Rutas
 app.use('/api/youtube', require('./rutas/youtube')); // <-- Ruta de Youtube
-app.use("/api/translate", require("../src/api/translate")); // <-- Ruta de traducción
 app.use("/api/users", require("./rutas/users")); // <-- Ruta de usuarios
 app.use("/api/comments", require("./rutas/comments")); // <-- Ruta de comentarios
 

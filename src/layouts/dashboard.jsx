@@ -41,9 +41,6 @@ export function Dashboard() {
         }}
       />
 
-      {/* Widget de Google Translate */}
-      <div id="google_translate_element"></div>
-
       {/* Contenido principal */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${openSidenav ? "xl:ml-80" : "xl:ml-0"}`}>
         

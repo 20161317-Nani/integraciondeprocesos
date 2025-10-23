@@ -1,7 +1,5 @@
-// src/widgets/layout/dashboard-navbar.jsx
+// src/widgets/layout/DashboardNavbar.jsx
 import React, { useState, useEffect } from "react";
-import LanguageSelector from "@/components/LanguageSelector";
-import { translateText } from "../../api/translate"; // solo una import
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Navbar,
@@ -35,18 +33,6 @@ export function DashboardNavbar() {
   const [searchTerm, setSearchTerm] = useState("");
   const token = localStorage.getItem("token");
 
-  const [texts, setTexts] = useState({
-    breadcrumbLayout: "Inicio",
-    breadcrumbPage: "Dashboard",
-    title: "Dashboard",
-    searchLabel: "Buscar",
-    login: "Iniciar Sesión",
-    settings: "Configuración",
-  });
-
-  const [lang, setLang] = useState(localStorage.getItem("lang") || "es"); // idioma guardado
-  const [translating, setTranslating] = useState(false);
-
   const getReadableName = (path) => {
     const names = {
       home: "Inicio",
@@ -59,6 +45,10 @@ export function DashboardNavbar() {
     return names[path] || path.charAt(0).toUpperCase() + path.slice(1);
   };
 
+  const [layout, page] = pathname.split("/").filter((el) => el !== "");
+  const translatedLayout = getReadableName(layout);
+  const translatedPage = getReadableName(page);
+
   const executeSearch = () => {
     if (searchTerm.trim() !== "") {
       navigate(`/dashboard/search?q=${searchTerm}`);
@@ -69,41 +59,36 @@ export function DashboardNavbar() {
     if (event.key === "Enter") executeSearch();
   };
 
+  // Dark mode
   useEffect(() => {
     document.body.classList.toggle("dark-mode", darkMode);
   }, [darkMode]);
 
-  // Traduce todos los textos y guarda el idioma
-  const handleTranslate = async (newLang) => {
-    setLang(newLang);
-    localStorage.setItem("lang", newLang);
-    setTranslating(true);
-    try {
-      const pathParts = pathname.split("/").filter((el) => el !== "");
-      const layout = getReadableName(pathParts[0] || "home");
-      const page = getReadableName(pathParts[1] || "Dashboard");
-
-      const newTexts = {
-        breadcrumbLayout: (await translateText(layout, "es", newLang)).translatedText,
-        breadcrumbPage: (await translateText(page, "es", newLang)).translatedText,
-        title: (await translateText(page, "es", newLang)).translatedText,
-        searchLabel: (await translateText("Buscar", "es", newLang)).translatedText,
-        login: (await translateText("Iniciar Sesión", "es", newLang)).translatedText,
-        settings: (await translateText("Configuración", "es", newLang)).translatedText,
-      };
-
-      setTexts(newTexts);
-    } catch (err) {
-      console.error("Error traduciendo textos:", err);
-    } finally {
-      setTranslating(false);
-    }
-  };
-
-  // Traducir automáticamente al montar el componente
+  // --------------------------
+  // GOOGLE TRANSLATE SCRIPT (solo una vez, incluye Español)
+  // --------------------------
   useEffect(() => {
-    handleTranslate(lang);
-  }, [pathname]);
+    if (document.getElementById("google-translate-script")) return;
+
+    window.googleTranslateElementInit = () => {
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: "es",
+          includedLanguages: "es,en,fr,pt,ja,zh-CN", // Agregamos "es" para que aparezca
+          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false,
+        },
+        "google_translate_element"
+      );
+    };
+
+    const script = document.createElement("script");
+    script.id = "google-translate-script";
+    script.src =
+      "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   return (
     <Navbar
@@ -127,51 +112,59 @@ export function DashboardNavbar() {
           >
             {openSidenav ? (
               <XMarkIcon
-                className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-700"}`}
+                className={`h-6 w-6 ${
+                  darkMode ? "text-white" : "text-blue-gray-700"
+                }`}
               />
             ) : (
               <Bars3Icon
-                className={`h-6 w-6 ${darkMode ? "text-white" : "text-blue-gray-700"}`}
+                className={`h-6 w-6 ${
+                  darkMode ? "text-white" : "text-blue-gray-700"
+                }`}
               />
             )}
           </IconButton>
 
           <div>
-            <Breadcrumbs className="bg-transparent p-0 transition-all">
-              <Link to={`/${pathname.split("/")[1] || ""}`}>
+            <Breadcrumbs
+              className={`bg-transparent p-0 transition-all ${
+                fixedNavbar ? "mt-1" : ""
+              }`}
+            >
+              <Link to={`/${layout}`}>
                 <Typography
                   variant="small"
-                  className={`font-normal transition-all hover:text-blue-500 ${
+                  className={`font-normal hover:text-blue-500 ${
                     darkMode
                       ? "text-gray-300 hover:text-white"
                       : "text-blue-gray-500 hover:text-blue-700"
                   }`}
                 >
-                  {texts.breadcrumbLayout}
+                  {translatedLayout}
                 </Typography>
               </Link>
               <Typography
                 variant="small"
-                className={`font-normal ${darkMode ? "text-gray-200" : "text-blue-gray-700"}`}
+                className={`${darkMode ? "text-gray-200" : "text-blue-gray-700"}`}
               >
-                {texts.breadcrumbPage}
+                {translatedPage}
               </Typography>
             </Breadcrumbs>
-
             <Typography
               variant="h6"
               className={`${darkMode ? "text-white" : "text-blue-gray-900"}`}
             >
-              {texts.title}
+              {translatedPage}
             </Typography>
           </div>
         </div>
 
         {/* Barra de búsqueda y botones */}
         <div className="flex items-center gap-2 md:gap-4">
+          {/* Buscar */}
           <div className="relative mr-auto md:mr-4 md:w-64">
             <Input
-              label={texts.searchLabel}
+              label="Buscar"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleSearchKeyDown}
@@ -186,8 +179,10 @@ export function DashboardNavbar() {
             </IconButton>
           </div>
 
-          <LanguageSelector handleTranslate={handleTranslate} />
+          {/* Google Translate */}
+          <div id="google_translate_element"></div>
 
+          {/* Modo oscuro */}
           <IconButton
             variant="text"
             color="blue-gray"
@@ -201,6 +196,7 @@ export function DashboardNavbar() {
             )}
           </IconButton>
 
+          {/* Login */}
           {!token && (
             <Link to="/auth/sign-in">
               <Button
@@ -209,18 +205,21 @@ export function DashboardNavbar() {
                 className="hidden items-center gap-1 px-4 xl:flex normal-case"
               >
                 <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                {texts.login}
+                Iniciar Sesión
               </Button>
             </Link>
           )}
 
+          {/* Configurador */}
           <IconButton
             variant="text"
             color="blue-gray"
             onClick={() => setOpenConfigurator(dispatch, true)}
           >
             <Cog6ToothIcon
-              className={`h-5 w-5 ${darkMode ? "text-white" : "text-blue-gray-500"}`}
+              className={`h-5 w-5 ${
+                darkMode ? "text-white" : "text-blue-gray-500"
+              }`}
             />
           </IconButton>
         </div>
