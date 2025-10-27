@@ -30,7 +30,7 @@ export function ResultadosBusqueda() {
   }, [query]); // Se ejecuta cada vez que la búsqueda en la URL cambia
 
   return (
-    <div className="mt-12">
+    <div className="mt-12 gx-6 px-5">
       <Typography variant="h5" className="mb-6">
         Resultados para: "{query}"
       </Typography>

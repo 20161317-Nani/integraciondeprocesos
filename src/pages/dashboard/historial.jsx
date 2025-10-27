@@ -86,7 +86,7 @@ useEffect(() => {
 
 
   return (
-    <div className="mt-12">
+    <div className="mt-12 px-5">
       <ProtectedContent message="Para ver tu historial, debes iniciar sesión.">
         <Typography variant="h4" className="mb-6">Historial de Reproducción</Typography>
         

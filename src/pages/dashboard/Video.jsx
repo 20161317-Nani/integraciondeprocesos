@@ -252,7 +252,7 @@ if (isLoading) {
 
   return (
    // Contenedor principal (flex row en pantallas grandes)
-    <div className="mt-12 flex flex-col lg:flex-row gap-6">
+    <div className="mt-12 flex flex-col lg:flex-row gap-6 gx-6 px-5">
 
       {/* --- INICIO: COLUMNA IZQUIERDA (VIDEO + SUGERIDOS) --- */}
       <div className="flex-[2] flex flex-col gap-6">
@@ -343,15 +343,18 @@ if (isLoading) {
           comments.map((comment) => ( // ¿Estás seguro de que 'comment' tiene '_id', 'userName', etc.?
               <div key={comment._id} className="mb-4 border-b pb-2">
                   <div className="flex items-center gap-2 mb-1">
-                      <Avatar src={`https://i.pravatar.cc/40?u=${comment.userId}`} size="sm" />
-                      <Typography variant="small" className="font-semibold">
+                      <Avatar 
+                        src={comment.userProfilePic || `https://i.pravatar.cc/40?u=${comment.userId}`} 
+                        size="lg" 
+                        />
+                      <Typography variant="medium" className="font-semibold">
                           {comment.userName}
                       </Typography>
-                      <Typography variant="small" color="gray" className="text-xs">
+                      <Typography variant="large" color="gray" className="text-xs">
                           {new Date(comment.createdAt).toLocaleDateString()}
                       </Typography>
                   </div>
-                  <Typography variant="paragraph" className="text-sm">
+                  <Typography variant="paragraph" className="text-lg">
                       {comment.text}
                   </Typography>
               </div>

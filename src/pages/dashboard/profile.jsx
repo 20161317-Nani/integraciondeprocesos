@@ -144,6 +144,44 @@ export function Profile() {
     );
   }
 
+  const handleRequestRecovery = async () => {
+    // 1. Asegúrate de que tengamos los datos del perfil
+    if (!userProfile || !userProfile.correo) {
+      setUpdateMessage('Error: No se pudo encontrar tu correo.');
+      setTimeout(() => setUpdateMessage(''), 3000);
+      return;
+    }
+
+    setUpdateMessage('Enviando correo de recuperación...'); // Mensaje de carga
+
+    try {
+      // 2. Llama a la MISMA ruta de backend que usa la página pública
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ correo: userProfile.correo }), // Envía el correo del perfil
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al enviar el correo');
+      }
+
+      // 3. Muestra el mensaje de éxito
+      setUpdateMessage('¡Se ha enviado un enlace a tu correo!');
+
+    } catch (error) {
+      console.error("Error al solicitar recuperación:", error);
+      setUpdateMessage(`Error: ${error.message}`);
+    } finally {
+      // Limpia el mensaje después de 4 segundos
+      setTimeout(() => setUpdateMessage(''), 4000);
+    }
+  };
+
   return (
       // Todo se envuelve en protectedcontent para saber si el usuaio esta logeado o no
     <ProtectedContent message="Para configurar tu perfil personal, debes iniciar sesión.">
@@ -155,7 +193,7 @@ export function Profile() {
       ) : (
         // Una vez que los datos llegan, muestra el perfil
     <>
-      <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover bg-center">
+      <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover bg-center gx-6 px-5">
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
       <Card className="mx-3 -mt-16 mb-6 lg:mx-4 border border-blue-gray-100">
@@ -260,10 +298,7 @@ export function Profile() {
                   variant="filled" 
                   color="blue"
                   className="w-full"
-                  onClick={() => {
-                    // Aquí puedes agregar la lógica para recuperar contraseña
-                    console.log("Solicitar recuperación de contraseña");
-                  }}
+                  onClick={() => { handleRequestRecovery(); }}
                 >
                   Recuperar Contraseña
                 </Button>

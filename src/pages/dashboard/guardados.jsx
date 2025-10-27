@@ -75,7 +75,7 @@ export function Guardados() {
 
   return (
     <ProtectedContent message="Para ver tus videos guardados, debes iniciar sesión.">
-      <div className="mt-12 flex flex-col gap-4">
+      <div className="mt-12 flex flex-col gap-4 gx-6 px-5">
         <div className="flex items-center gap-2 mb-4">
           <BookmarkIcon className="w-6 h-6 text-blue-500" />
           <Input /* ... props de búsqueda ... */ />

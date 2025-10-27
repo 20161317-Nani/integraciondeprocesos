@@ -23,6 +23,10 @@ const CommentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  userProfilePic: {
+    type: String,
+    default: 'https://res.cloudinary.com/dqrk93n3a/image/upload/v1717887348/profile_pictures/user-default-avatar.png'
+  }
 });
 
 module.exports = mongoose.model('comment', CommentSchema);

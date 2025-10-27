@@ -105,7 +105,7 @@ export function Home() {
   };
 
     return (
-    <div className="mt-12">
+    <div className="mt-12 px-5">
       <FilterBar onFilterChange={handleFilterChange} />
       {isLoading ? (
         <Typography>Cargando...</Typography>

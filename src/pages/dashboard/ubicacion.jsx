@@ -46,13 +46,18 @@ function DraggableMarker({ position, setPosition }) {
 
 
 export function Ubicacion() {
-  // Estados para la posición, videos, carga y mensajes
-  const [currentPosition, setCurrentPosition] = useState(null);
-  const [suggestedVideos, setSuggestedVideos] = useState([]);
+const [currentPosition, setCurrentPosition] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState("");
-  const [displayMode, setDisplayMode] = useState("sugeridos");
+  
+
+  const [suggestedVideos, setSuggestedVideos] = useState([]);
+  const [originalResults, setOriginalResults] = useState([]);
+  const [translatedResults, setTranslatedResults] = useState([]);
+  const [searchQueries, setSearchQueries] = useState({ original: '', translated: '' });
+
+  const [displayMode, setDisplayMode] = useState("sugeridos"); // "sugeridos" o término de búsqueda
 
   // 1. Obtiene la ubicación inicial del navegador al cargar la página
  useEffect(() => {
@@ -99,47 +104,31 @@ export function Ubicacion() {
   }, []); // Se ejecuta solo una vez al cargar
 
   // 2. Carga videos sugeridos o de búsqueda cuando cambia la posición o el término de búsqueda
-  const fetchVideosForCurrentLocation = useCallback(async (position, currentSearchTerm) => {
+ const fetchSuggestedVideos = useCallback(async (position) => {
     if (!position) return;
     setIsLoading(true);
-    setMessage('');
-    
+    setDisplayMode("sugeridos");
+    setOriginalResults([]); // Limpia resultados de búsqueda
+    setTranslatedResults([]); // Limpia resultados de búsqueda
     try {
       const { lat, lng } = position;
-      let response;
-
-      if (currentSearchTerm.trim() !== "") {
-        // A. Si hay un término de búsqueda, refresca la búsqueda
-        console.log(`Refrescando búsqueda de "${currentSearchTerm}" en [${lat}, ${lng}]`);
-        response = await fetch(`/api/youtube/location-query-search?q=${currentSearchTerm}&lat=${lat}&lon=${lng}`);
-        setDisplayMode(`"${currentSearchTerm}"`);
-      } else {
-        // B. Si no hay término de búsqueda, trae sugerencias
-        console.log(`Cargando sugerencias en [${lat}, ${lng}]`);
-        response = await fetch(`/api/youtube/combined-search?lat=${lat}&lon=${lng}`);
-        setDisplayMode("sugeridos");
-      }
-
-      if (!response.ok) throw new Error("No se pudieron cargar los videos.");
+      const response = await fetch(`/api/youtube/combined-search?lat=${lat}&lon=${lng}`);
+      if (!response.ok) throw new Error("No se pudieron cargar sugerencias.");
       const data = await response.json();
       setSuggestedVideos(data);
-
     } catch (error) {
-      console.error("Error al cargar videos por ubicación:", error);
-      setMessage("No se pudieron cargar los videos para esta área.");
+      console.error("Error al cargar videos sugeridos:", error);
     } finally {
       setIsLoading(false);
     }
-  }, []); // Depende de 'useCallback', no de estados
+  }, []);
 
-  // 3. useEffect para cargar videos cuando cambia la posición o el término de búsqueda
+  // 3. Carga videos sugeridos solo cuando cambia la posición
   useEffect(() => {
-    // Cuando la posición cambia, vuelve a cargar los videos
-    // leyendo el estado 'searchTerm' actual.
-    fetchVideosForCurrentLocation(currentPosition, searchTerm);
-  }, [currentPosition, fetchVideosForCurrentLocation]); // Depende de la posición
+      fetchSuggestedVideos(currentPosition);
+  }, [currentPosition, fetchSuggestedVideos]);
 
-  // 3. Guarda la ubicación en la base de datos
+  // 4. Guarda la ubicación en la base de datos
   const handleSaveLocation = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -147,7 +136,7 @@ export function Ubicacion() {
         return;
     }
 
-    // LÓGICA DE NORMALIZACIÓN 👇
+    // LÓGICA DE NORMALIZACIÓN 
     let longitude = currentPosition.lng;
     // Normaliza la longitud para que esté entre -180 y 180
     while (longitude < -180) longitude += 360;
@@ -169,15 +158,37 @@ export function Ubicacion() {
         setMessage('Error al guardar la ubicación.');
     }
 };
-// 4. Maneja la búsqueda por ubicación y término
-const handleLocationQuerySearch = async () => {
-    fetchVideosForCurrentLocation(currentPosition, searchTerm);
+// 5. Función para la BÚSQUEDA BILINGÜE
+  const handleBilingualSearch = async () => {
+    if (!searchTerm.trim() || !currentPosition) return;
+
+    setIsLoading(true);
+    setMessage('');
+    setDisplayMode("busqueda");
+    setSuggestedVideos([]); // Limpia sugerencias
+    
+    try {
+      const { lat, lng } = currentPosition;
+      const response = await fetch(`/api/youtube/bilingual-search?q=${searchTerm}&lat=${lat}&lon=${lng}`);
+      if (!response.ok) throw new Error("Error en la búsqueda bilingüe");
+      
+      const data = await response.json();
+      setOriginalResults(data.originalResults || []);
+      setTranslatedResults(data.translatedResults || []);
+      setSearchQueries({ original: data.originalQuery, translated: data.translatedQuery });
+
+    } catch (error) {
+      console.error("Error en la búsqueda bilingüe:", error);
+      setMessage("No se pudieron encontrar videos para esa búsqueda.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
 return (
-  <div className="mt-12">
+  <div className="mt-12 gap-8 px-5">
     <ProtectedContent message="Para usar la función de localización, debes iniciar sesión.">
-      {/* 👇 CORRECCIÓN: Se eliminó 'lg:flex-row' para que siempre sea una columna 👇 */}
+      {/* 👇 CORRECCIÓN: Se eliminó 'lg:flex-row' para que siempre sea una columna  */}
       <div className="flex flex-col gap-8">
 
         {/* --- SECCIÓN SUPERIOR: MAPA --- */}
@@ -202,53 +213,76 @@ return (
           {message && <Typography color="blue-gray" className="text-center mt-2">{message}</Typography>}
         </div>
             {/* --- SECCIÓN BÚSQUEDA --- */}
-         <div className="relative w-full max-w-md">
+         <div className="w-full  flex-col gap-4 flex justify-start">
+            <div className="flex justify-between items-center">
+              <Typography variant="h5">
+                {displayMode === "sugeridos" ? "Sugerencias Cercanas" : `Resultados de Búsqueda`}
+              </Typography>
+
+              <div className=" w-full max-w-md flex">
                 <Input
                   label="Buscar en esta área..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleLocationQuerySearch()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleBilingualSearch()}
                   className="pr-10"
                 />
-                <IconButton
-                  size="sm"
-                  className="!absolute right-1 top-1/2 -translate-y-1/2 rounded"
-                  onClick={handleLocationQuerySearch}
-                >
+                <IconButton /* ... */ onClick={handleBilingualSearch}>
                   <MagnifyingGlassIcon className="h-5 w-5" />
                 </IconButton>
               </div>
-
-        {/* --- SECCIÓN INFERIOR: VIDEOS--- */}
-          <div className="w-full flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-              <Typography variant="h5">
-                {displayMode === "sugeridos" ? "Sugerencias Cercanas" : `Resultados para: ${displayMode}`}
-              </Typography>
             </div>
+            
 
-            {/* --- CUADRÍCULA DE VIDEOS --- */}
+        {/* --- CUADRÍCULA DE VIDEOS --- */}
             {isLoading ? (
-                <Typography>Cargando...</Typography>
+              <Typography>Cargando...</Typography>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {suggestedVideos.length > 0 ? (
-                    suggestedVideos.map((video) => (
-                        <VideoCard key={video.id} video={video} />
-                    ))
+              <div className="flex flex-col gap-8">
+                {/* Muestra sugerencias O los resultados de búsqueda bilingüe */}
+                {displayMode === "sugeridos" ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {suggestedVideos.length > 0 ? (
+                      suggestedVideos.map((video) => <VideoCard key={video.id} video={video} />)
+                    ) : ( <Typography>No hay sugerencias para esta área.</Typography> )}
+                  </div>
                 ) : (
-                    <Typography className="col-span-full text-center">
-                        No se encontraron videos.
-                    </Typography>
+                  <>
+                    {/* Sección para Resultados Originales */}
+                    {originalResults.length > 0 && (
+                      <div>
+                        <Typography variant="h6" className="mb-4">Resultados para "{searchQueries.original}"</Typography>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                          {originalResults.map((video) => <VideoCard key={video.id} video={video} />)}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Sección para Resultados Traducidos */}
+                    {translatedResults.length > 0 && (
+                      <div>
+                        <Typography variant="h6" className="mb-4">Resultados para "{searchQueries.translated}" (Idioma local)</Typography>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                          {translatedResults.map((video) => <VideoCard key={video.id} video={video} />)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Mensaje si no hay NINGÚN resultado */}
+                    {originalResults.length === 0 && translatedResults.length === 0 && (
+                      <Typography className="col-span-full text-center">
+                        No se encontraron videos para "{searchTerm}".
+                      </Typography>
+                    )}
+                  </>
                 )}
-                </div>
+              </div>
             )}
           </div>
-
         </div>
-    </ProtectedContent>
-  </div>
-);
+      </ProtectedContent>
+    </div>
+  );
 }
 
 export default Ubicacion;

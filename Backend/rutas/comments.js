@@ -22,13 +22,16 @@ router.get('/:videoId', async (req, res) => {
 // @desc    Añadir un nuevo comentario a un video
 // @acceso  Privado
 router.post('/:videoId', auth, async (req, res) => {
+
+  
   try {
     const { text } = req.body;
     if (!text) {
       return res.status(400).json({ message: 'El texto del comentario es requerido' });
     }
-
-    const user = await User.findById(req.user.id).select('nombre apellido');
+// 👇 SE DECLARA 'user' UNA SOLA VEZ, OBTENIENDO TODOS LOS DATOS
+    const user = await User.findById(req.user.id).select('nombre apellido profilePictureUrl');
+    
     if (!user) {
         return res.status(404).json({ message: 'Usuario no encontrado' });
     }
@@ -38,6 +41,7 @@ router.post('/:videoId', auth, async (req, res) => {
       videoId: req.params.videoId,
       userId: req.user.id,
       userName: userName,
+      userProfilePic: user.profilePictureUrl,
       text: text,
     });
 
