@@ -5,7 +5,7 @@ import {
   HomeIcon,  ChatBubbleLeftEllipsisIcon,  Cog6ToothIcon,  PencilIcon, CameraIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState, useRef } from 'react';
 import ProtectedContent from '@/components/ProtectedContent'; // Importa el contenido protegido
-
+import { fetchAPI } from '@/api'
 
 export function Profile() {
 
