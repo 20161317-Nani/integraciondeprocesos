@@ -5,9 +5,14 @@ const UserSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   apellido: { type: String, required: true },
   correo: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, required: false },
   telefono: { type: String },
   date: { type: Date, default: Date.now },
+  googleId: { 
+      type: String,
+      unique: true,
+      sparse: true // Permite múltiples documentos con 'null'
+    },
   location: {
     type: {
       type: String,

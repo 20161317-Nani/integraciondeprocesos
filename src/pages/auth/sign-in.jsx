@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useMaterialTailwindController } from "@/context";
 import { useNavigate } from "react-router-dom";
+import { useGoogleLogin } from '@react-oauth/google';
 
 
 const imageSets = {
@@ -77,6 +78,40 @@ export function SignIn() {
     // Navega a la página principal del dashboard
     navigate('/dashboard/home');
   };
+
+
+  const handleGoogleLoginSuccess = async (tokenResponse) => {
+    try {
+      // 3. Envía el token de Google a TU backend
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: tokenResponse.access_token }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Falló la autenticación con el backend');
+      }
+
+      // 4. Recibe TU PROPIO token JWT del backend
+      const data = await response.json();
+      
+      // 5. Guarda TU token y redirige
+      localStorage.setItem('token', data.token);
+      alert('¡Inicio de sesión con Google exitoso!');
+      window.location.href = '/dashboard/home';
+
+    } catch (error) {
+      console.error("Error al enviar token de Google al backend:", error);
+      alert('Error al iniciar sesión con Google.');
+    }
+  };
+
+  // 6. Inicializa el hook de login de Google
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleLoginSuccess,
+    onError: (error) => console.error('Error en el login de Google:', error),
+  });
 
 
   useEffect(() => {
@@ -188,6 +223,8 @@ export function SignIn() {
               color="white"
               className="flex items-center gap-2 justify-center shadow-md"
               fullWidth
+              onClick={() => googleLogin()} 
+              type="button" // MUY IMPORTANTE: para no enviar el formulario de login
             >
               <svg width="17" height="16" viewBox="0 0 17 16" fill="none">
                 <g clipPath="url(#clip0)">

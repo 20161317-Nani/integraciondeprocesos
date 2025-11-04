@@ -186,5 +186,70 @@ router.get('/me', auth, async (req, res) => { // <-- 2. APLICA EL MIDDLEWARE 'au
   }
 });
 
+// @ruta    POST /api/auth/google
+// @desc    Autenticar usuario con Google
+// @acceso  Público
+router.post('/google', async (req, res) => {
+  const { access_token } = req.body;
+
+  if (!access_token) {
+    return res.status(400).json({ message: 'No se proporcionó el token de Google' });
+  }
+
+  try {
+    // 1. Usa el access_token para obtener la info del usuario de Google
+    const googleResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+
+    const { sub, email, given_name, family_name, picture } = googleResponse.data;
+
+    // 2. Busca al usuario en tu base de datos por su ID de Google (sub)
+    let user = await User.findOne({ googleId: sub });
+
+    if (!user) {
+      // 3. Si no existe, búscalo por email (quizás se registró localmente)
+      user = await User.findOne({ correo: email });
+      if (user) {
+        // Si existe por email, vincula su cuenta de Google
+        user.googleId = sub;
+        user.profilePictureUrl = user.profilePictureUrl || picture; // Actualiza foto si no tiene
+        await user.save();
+      } else {
+        // 4. Si no existe en absoluto, crea un nuevo usuario
+        user = new User({
+          googleId: sub,
+          correo: email,
+          nombre: given_name,
+          apellido: family_name || '',
+          profilePictureUrl: picture,
+          // La contraseña es opcional, así que no la establecemos
+        });
+        await user.save();
+      }
+    }
+
+    // 5. Crea TU PROPIO token JWT (igual que en el login normal)
+    const payload = {
+      user: {
+        id: user.id,
+      },
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '5h' },
+      (err, token) => {
+        if (err) throw err;
+        res.json({ token }); // Devuelve tu token
+      }
+    );
+  } catch (error) {
+    console.error('Error en la autenticación de Google:', error.message);
+    res.status(500).send('Error del servidor');
+  }
+});
+
 
 module.exports = router;
