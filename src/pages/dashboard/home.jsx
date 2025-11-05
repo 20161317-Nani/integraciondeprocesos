@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Typography } from "@material-tailwind/react";
 import { VideoCard } from "@/widgets/cards/VideoCard";
 import { FilterBar } from "@/widgets/layout/FilterBar";
+import { fetchApi } from "@/api";
+
 
 
 export function Home() {
@@ -12,16 +14,13 @@ export function Home() {
   const [isLoading, setIsLoading] = useState(true); // Estado para la carga
   const [error, setError] = useState(''); // Estado para mensajes de error
 
-  const [savedIdsSet, setSavedIdsSet] = useState(new Set()); // Usamos un Set para búsquedas rápidas
 
   useEffect(() => {
     const fetchSaved = async () => {
       const token = localStorage.getItem('token');
       if (!token) return; // Solo para usuarios logueados
       try {
-        const response = await fetch('/api/users/saved', {
-          headers: { 'x-auth-token': token },
-        });
+        const response = await fetchApi('/api/users/saved');
         if (!response.ok) return;
         const data = await response.json();
         setSavedVideoIds(new Set(data.savedVideos || []));
@@ -38,7 +37,7 @@ export function Home() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/youtube/videos');
+      const response = await fetchApi('/api/youtube/videos');
       const data = await response.json();
       setVideos(data);
     } catch (err) {
@@ -64,9 +63,7 @@ export function Home() {
 
     try {
       // 1. Obtiene el perfil del usuario para leer su ubicación guardada
-      const profileResponse = await fetch('/api/auth/me', {
-        headers: { 'x-auth-token': token },
-      });
+      const profileResponse = await fetchApi('/api/users/profile');
       const profileData = await profileResponse.json();
 
       // 2. Revisa si tiene una ubicación guardada y válida
@@ -75,7 +72,7 @@ export function Home() {
         const lon = profileData.location.coordinates[0];
 
         // 3. Pide los videos cercanos usando la ubicación de la BD
-        const videoResponse = await fetch(`/api/youtube/combined-search?lat=${lat}&lon=${lon}`);
+        const videoResponse = await fetchApi(`/api/youtube/combined-search?lat=${lat}&lon=${lon}`);
         const videoData = await videoResponse.json();
         setVideos(videoData);
       } else {

@@ -5,6 +5,7 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useMaterialTailwindController } from "@/context";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from '@react-oauth/google';
+import { fetchApi } from '@/api'; 
 
 
 const imageSets = {
@@ -49,9 +50,8 @@ export function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault(); // Evita que la página se recargue
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetchApi('/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
@@ -83,9 +83,8 @@ export function SignIn() {
   const handleGoogleLoginSuccess = async (tokenResponse) => {
     try {
       // 3. Envía el token de Google a TU backend
-      const response = await fetch('/api/auth/google', {
+      const response = await fetchApi('/api/auth/google', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_token: tokenResponse.access_token }),
       });
 
